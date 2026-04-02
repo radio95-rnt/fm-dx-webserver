@@ -9,8 +9,8 @@ var Fallback_Settings = /** @class */ (function () {
             { "Mime": "audio/wave", "Name": "wav" }
         ];
         this.MaxVolume = 1.0;
-        this.AutoCorrectSpeed = true;
-        this.InitialBufferLength = 1.0;
+        this.AutoCorrectSpeed = false;
+        this.InitialBufferLength = 1.0 / 2.5;
     }
     return Fallback_Settings;
 }());

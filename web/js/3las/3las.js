@@ -73,7 +73,7 @@ var _3LAS = /** @class */ (function () {
                 let endTimeConnectionWatchdog = performance.now();
                 elapsedTimeConnectionWatchdog = endTimeConnectionWatchdog - window.startTimeConnectionWatchdog;
                 //console.log(`Stream frame elapsed time: ${parseInt(elapsedTimeConnectionWatchdog)} ms`);
-                if (elapsedTimeConnectionWatchdog > 2000 && shouldReconnect) {
+                if (elapsedTimeConnectionWatchdog > 5000 && shouldReconnect) {
                     clearInterval(intervalReconnectWatchdog);
                     setTimeout(() => {
                         clearInterval(intervalReconnectWatchdog);
