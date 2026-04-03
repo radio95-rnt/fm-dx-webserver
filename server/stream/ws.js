@@ -1,7 +1,6 @@
 const WebSocket = require('ws');
-const { serverConfig } = require('../server_config');
 const audio_pipe = require('./index.js');
-const { getIpAddress } = require("../helpers.js")
+const storage = require('../storage');
 
 const audioWss = new WebSocket.Server({ noServer: true, skipUTF8Validation: true });
 
@@ -17,4 +16,4 @@ audio_pipe.on('end', () => {
     });
 });
 
-module.exports = audioWss;
+storage.websocket_delegation.set("/audio", audioWss);

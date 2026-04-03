@@ -3,7 +3,6 @@ const { serverConfig } = require('../server_config');
 const { logDebug, logError, logInfo, logWarn, logFfmpeg } = require('../console');
 const checkFFmpeg = require('./checkFFmpeg');
 const { PassThrough } = require('stream');
-const storage = require('../storage');
 
 const consoleLogTitle = '[Audio Stream]';
 
@@ -139,5 +138,3 @@ checkFFmpeg().then((ffmpegPath) => {
 }).catch((err) => {
     logError(`${consoleLogTitle} Error: ${err.message}`);
 });
-
-storage.websocket_delegation.set("/audio", audioWss);
