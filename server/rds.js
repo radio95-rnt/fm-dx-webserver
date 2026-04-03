@@ -152,11 +152,11 @@ class RDSDecoder {
   clear() {
     this.data.pi = '?';
     this.ps = Array(8).fill(' ');
-    this.ps_errors = Array(8).fill("0");
+    this.ps_errors = Array(8).fill("10");
     this.rt0 = Array(64).fill(' ');
-    this.rt0_errors = Array(64).fill("0");
+    this.rt0_errors = Array(64).fill("10");
     this.rt1 = Array(64).fill(' ');
-    this.rt1_errors = Array(64).fill("0");
+    this.rt1_errors = Array(64).fill("10");
     this.data.ps = '';
     this.data.rt1 = '';
     this.data.rt0 = '';
@@ -168,10 +168,12 @@ class RDSDecoder {
     this.rt1_to_clear = false;
     this.rt0_to_clear = false;
     this.data.ecc = null;
+    this.ecc_error = 3;
     this.data.country_name = ""
     this.data.country_iso = "UN"
 
     this.af_len = 0;
+    this.af_len_error = 3;
     this.data.af = []
     this.af_am_follows = false;
 
@@ -185,7 +187,7 @@ class RDSDecoder {
     const d_error = error & 3;
 
     if(this.last_pi_error > a_error) {
-        this.data.pi = blockA.toString(16).toUpperCase().padStart(4, '0');
+        this.data.pi = blockA.toString(16).toUpperCase().padStart(4, '0') + ("?".repeat(a_error));
         this.last_pi_error = a_error;
     }
 
@@ -209,12 +211,13 @@ class RDSDecoder {
 
             if(af_high >= BASE && af_high <= (BASE+25)) {
                 this.af_len = af_high-BASE;
-                if(this.af_len !== this.data.af.length)  {
+                if(this.af_len !== this.data.af.length && c_error < this.af_len_error)  {
                     this.data.af = [];
                     this.af_am_follows = false;
 
                     if(af_low != FILLER && af_low != AM_FOLLOWS) this.data.af.push((af_low+875)*100)
                     else if(af_low == AM_FOLLOWS) this.af_am_follows = true;
+                    this.af_len_error = c_error;
                 }
             } else if(this.data.af.length != this.af_len) {
                 if(!(af_high == AM_FOLLOWS || this.af_am_follows)) {
@@ -235,11 +238,13 @@ class RDSDecoder {
         const idx = blockB & 0x3;
         
         const last_err = this.ps_errors[idx * 2];
-        const cur_err = Math.ceil(d_error * (10/3));
+        const cur_err = Math.ceil(d_error * (10/3)); // They expect an error score of 0-10 with 10 being the worst. Too bad we don't have that resolution
         const character_a = decode_charset(blockD >> 8);
         const character_b = decode_charset(blockD & 0xFF);
 
-        if(last_err < cur_err && this.ps[idx * 2] == character_a && this.ps[idx * 2 + 1] == character_b) return;
+        // TODO: Maybe add an option for toggling whether to check content?
+        if(last_err < cur_err) return;
+        // if(last_err < cur_err && this.ps[idx * 2] == character_a && this.ps[idx * 2 + 1] == character_b) return;
 
         this.ps[idx * 2] = character_a;
         this.ps[idx * 2 + 1] = character_b;
@@ -253,10 +258,12 @@ class RDSDecoder {
         var variant_code = (blockC >> 12) & 0x7;
         switch (variant_code) {
             case 0:
+                if(c_error > this.ecc_error) break;
                 this.data.ecc = blockC & 0xff;
                 this.data.country_name = rdsEccLookup(blockA, this.data.ecc);
                 if(this.data.country_name.length === 0) this.data.country_iso = "UN";
                 else this.data.country_iso = iso[countries.indexOf(this.data.country_name)]
+                this.ecc_error = c_error
                 break;
             default: break;
         }
@@ -272,17 +279,25 @@ class RDSDecoder {
             }
 
             if(c_error < 2 && multiplier !== 2) {
-                this.rt1[idx * multiplier] = decode_charset(blockC >> 8);
-                this.rt1[idx * multiplier + 1] = decode_charset(blockC & 0xFF);
-                this.rt1_errors[idx * multiplier] = Math.ceil(c_error * (10/3));
-                this.rt1_errors[idx * multiplier + 1] = Math.ceil(c_error * (10/3));
+                const err = Math.ceil(c_error * (10/3));
+                const old_err = this.rt1_errors[idx * multiplier];
+                if(err < old_err) {
+                    this.rt1[idx * multiplier] = decode_charset(blockC >> 8);
+                    this.rt1[idx * multiplier + 1] = decode_charset(blockC & 0xFF);
+                    this.rt1_errors[idx * multiplier] = err;
+                    this.rt1_errors[idx * multiplier + 1] = err;
+                }
             }
             if(d_error < 2) {
-                var offset = (multiplier == 2) ? 0 : 2;
-                this.rt1[idx * multiplier + offset] = decode_charset(blockD >> 8);
-                this.rt1[idx * multiplier + offset + 1] = decode_charset(blockD & 0xFF);
-                this.rt1_errors[idx * multiplier + offset] = Math.ceil(d_error * (10/3));
-                this.rt1_errors[idx * multiplier + offset + 1] = Math.ceil(d_error * (10/3));
+                const offset = (multiplier == 2) ? 0 : 2;
+                const err = Math.ceil(d_error * (10/3));
+                const old_err = this.rt1_errors[idx * multiplier + offset];
+                if(err < old_err) {
+                    this.rt1[idx * multiplier + offset] = decode_charset(blockD >> 8);
+                    this.rt1[idx * multiplier + offset + 1] = decode_charset(blockD & 0xFF);
+                    this.rt1_errors[idx * multiplier + offset] = err;
+                    this.rt1_errors[idx * multiplier + offset + 1] = err;
+                }
             }
 
             var i = this.rt1.indexOf("\r")
@@ -302,18 +317,26 @@ class RDSDecoder {
                 this.rt0_to_clear = false;
             }
 
-            if(c_error !== 3 && multiplier !== 2) {
-                this.rt0[idx * multiplier] = decode_charset(blockC >> 8);
-                this.rt0[idx * multiplier + 1] = decode_charset(blockC & 0xFF);
-                this.rt0_errors[idx * multiplier] = Math.ceil(c_error * (10/3));
-                this.rt0_errors[idx * multiplier + 1] = Math.ceil(c_error * (10/3));
+            if(c_error < 2 && multiplier !== 2) {
+                const err = Math.ceil(c_error * (10/3));
+                const old_err = this.rt0_errors[idx * multiplier];
+                if(err < old_err) {
+                    this.rt0[idx * multiplier] = decode_charset(blockC >> 8);
+                    this.rt0[idx * multiplier + 1] = decode_charset(blockC & 0xFF);
+                    this.rt0_errors[idx * multiplier] = err;
+                    this.rt0_errors[idx * multiplier + 1] = err;
+                }
             }
-            if(d_error !== 3) {
-                var offset = (multiplier == 2) ? 0 : 2;
-                this.rt0[idx * multiplier + offset] = decode_charset(blockD >> 8);
-                this.rt0[idx * multiplier + offset + 1] = decode_charset(blockD & 0xFF);
-                this.rt0_errors[idx * multiplier + offset] = Math.ceil(d_error * (10/3));
-                this.rt0_errors[idx * multiplier + offset + 1] = Math.ceil(d_error * (10/3));
+            if(d_error < 2) {
+                const offset = (multiplier == 2) ? 0 : 2;
+                const err = Math.ceil(d_error * (10/3));
+                const old_err = this.rt1_errors[idx * multiplier + offset];
+                if(err < old_err) {
+                    this.rt0[idx * multiplier + offset] = decode_charset(blockD >> 8);
+                    this.rt0[idx * multiplier + offset + 1] = decode_charset(blockD & 0xFF);
+                    this.rt0_errors[idx * multiplier + offset] = err;
+                    this.rt0_errors[idx * multiplier + offset + 1] = err;
+                }
             }
 
             var i = this.rt0.indexOf("\r");
