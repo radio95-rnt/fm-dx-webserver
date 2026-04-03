@@ -112,6 +112,7 @@ function OnPlayButtonClick(_ev) {
 
     $playbutton.addClass('bg-gray').prop('disabled', true);
     setTimeout(() => $playbutton.removeClass('bg-gray').prop('disabled', false), 2500);
+    updateVolume();
 }
 
 function updateVolume() {
