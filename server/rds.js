@@ -330,7 +330,7 @@ class RDSDecoder {
             if(d_error < 2) {
                 const offset = (multiplier == 2) ? 0 : 2;
                 const err = Math.ceil(d_error * (10/3));
-                const old_err = this.rt1_errors[idx * multiplier + offset];
+                const old_err = this.rt0_errors[idx * multiplier + offset];
                 if(err < old_err) {
                     this.rt0[idx * multiplier + offset] = decode_charset(blockD >> 8);
                     this.rt0[idx * multiplier + offset + 1] = decode_charset(blockD & 0xFF);
