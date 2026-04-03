@@ -6,7 +6,7 @@
 
 const { EventEmitter } = require('events');
 const { logWarn, logError } = require('./console');
-const { storage } = require('./storage');
+const storage = require('./storage');
 
 let output = null;
 let wss = null;
