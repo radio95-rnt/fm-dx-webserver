@@ -12,7 +12,6 @@ const WebSocket = require('ws');
 const rawComm = new WebSocket.Server({ noServer: true });
 
 rawComm.on('connection', (ws, request) => {
-  const output = serverConfig.xdrd.wirelessConnection ? client : serialport;
   const { isAdminAuthenticated } = request.session || {};
   if(!isAdminAuthenticated) {
     ws.close(1008, "No admin");
@@ -20,7 +19,7 @@ rawComm.on('connection', (ws, request) => {
   }
 
   ws.on('message', (message) => {
-    output.write(`${message.toString()}\n`);
+    storage.ctl_output.write(`${message.toString()}\n`);
   });
 });
 

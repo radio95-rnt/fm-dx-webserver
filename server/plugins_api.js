@@ -6,6 +6,7 @@
 
 const { EventEmitter } = require('events');
 const { logWarn, logError } = require('./console');
+const { storage } = require('./storage');
 
 let output = null;
 let wss = null;
@@ -30,10 +31,12 @@ function registerServerContext(ctx) {
 
 function setOutput(newOutput) {
     output = newOutput;
+    storage.ctl_output = newOutput;
 }
 
 function clearOutput() {
     output = null;
+    storage.ctl_output = null;
 }
 
 // ---- accessors plugin side ----
