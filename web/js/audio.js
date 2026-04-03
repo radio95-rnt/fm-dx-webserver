@@ -10,8 +10,8 @@ class WebSocketAudioPlayer {
   }
 
   _trimBuffer() {
-    if (!this.sourceBuffer.updating && this.audio.currentTime > 5) {
-        this.sourceBuffer.remove(0, this.audio.currentTime - 2);
+    if (!this.sourceBuffer.updating && this.audio.currentTime > 1) {
+        this.sourceBuffer.remove(0, this.audio.currentTime - 0.5);
     }
   }
 
@@ -22,7 +22,10 @@ class WebSocketAudioPlayer {
 
     this.mediaSource.addEventListener('sourceopen', () => {
       this.sourceBuffer = this.mediaSource.addSourceBuffer('audio/mpeg');
-      this.sourceBuffer.addEventListener('updateend', () => this._appendNext());
+      this.sourceBuffer.addEventListener('updateend', () => {
+        this._appendNext();
+        this._trimBuffer();
+      });
 
       this.ws = new WebSocket(this.url);
       this.ws.binaryType = 'arraybuffer';
