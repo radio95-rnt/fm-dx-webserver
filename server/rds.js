@@ -274,7 +274,7 @@ class RDSDecoder {
         if(this.rt_ab) {
             if(this.rt1_to_clear) {
                 this.rt1 = Array(64).fill(' ');
-                this.rt1_errors = Array(64).fill("0");
+                this.rt1_errors = Array(64).fill("10");
                 this.rt1_to_clear = false;
             }
 
@@ -313,7 +313,7 @@ class RDSDecoder {
         } else {
             if(this.rt0_to_clear) {
                 this.rt0 = Array(64).fill(' ');
-                this.rt0_errors = Array(64).fill("0");
+                this.rt0_errors = Array(64).fill("10");
                 this.rt0_to_clear = false;
             }
 
