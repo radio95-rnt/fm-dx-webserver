@@ -9,12 +9,6 @@ class WebSocketAudioPlayer {
     this.started = false;
   }
 
-  _trimBuffer() {
-    if (!this.sourceBuffer.updating && this.audio.currentTime > 1) {
-        this.sourceBuffer.remove(0, this.audio.currentTime - 0.5);
-    }
-  }
-
   _syncToLive() {
     if (!this.audio || !this.sourceBuffer) return;
     const buffered = this.sourceBuffer.buffered;
@@ -23,9 +17,7 @@ class WebSocketAudioPlayer {
     const liveEdge = buffered.end(buffered.length - 1);
     const lag = liveEdge - this.audio.currentTime;
 
-    if (lag > 1.5) {  // more than 1.5s behind live
-      this.audio.currentTime = liveEdge - 0.1;  // snap to near live edge
-    }
+    if (lag > .5) this.audio.currentTime = liveEdge - 0.1;  // snap to near live edge
   }
 
   start() {
@@ -35,10 +27,7 @@ class WebSocketAudioPlayer {
 
     this.mediaSource.addEventListener('sourceopen', () => {
       this.sourceBuffer = this.mediaSource.addSourceBuffer('audio/mpeg');
-      this.sourceBuffer.addEventListener('updateend', () => {
-        this._appendNext();
-        this._trimBuffer();
-      });
+      this.sourceBuffer.addEventListener('updateend', () => this._appendNext());
       this.audio.addEventListener('waiting', () => this._syncToLive());
       this.audio.addEventListener('stalled', () => this._syncToLive());
 
@@ -48,7 +37,6 @@ class WebSocketAudioPlayer {
         this.queue.push(event.data);
         this._appendNext();
         if (!this.started && this.queue.length === 0) { this.audio.play(); this.started = true; }
-        this._trimBuffer();
       };
       this.ws.onclose = () => {
         if (this.mediaSource.readyState === 'open') this.mediaSource.endOfStream();
