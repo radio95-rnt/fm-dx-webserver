@@ -45,11 +45,7 @@ let serverConfig = {
     audioDevice: "Microphone (High Definition Audio Device)",
     audioChannels: 2,
     audioBitrate: "128k",
-    audioBoost: false,
-    softwareMode: false,
-    startupVolume: "1",
-    ffmpeg: false,
-    samplerateOffset: "0"
+    startupVolume: "1"
   },
   identification: {
     token: null,

@@ -213,33 +213,7 @@
                             ]
                             }) %><br>
                         </div>
-                </div>
-
-                <div class="flex-container">
-                    <div class="panel-50 p-bottom-20">
-                        <h3>Audio boost</h3>
-                        <p>This option will boost the audio volume. Use if the output is too quiet.</p>
-                        <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Audio Boost', id: 'audio-audioBoost'}) %>
                     </div>
-                    <div class="panel-50 p-bottom-20">
-                        <h3>Experimental</h3>
-                        <p>If you use a USB audio card on Linux, enabling this option might fix your audio issues.</p>
-                        <%- include('_components', {component: 'checkbox', cssClass: '', label: 'ALSA Software mode', id: 'audio-softwareMode'}) %>
-                    </div>
-                </div>
-                <div class="flex-container">
-                    <div class="panel-50 p-bottom-20 bottom-20">
-                        <h3>FFmpeg</h3>
-                        <p>Legacy option for Linux / macOS that could resolve audio issues, but will consume additional CPU and RAM usage.</p>
-                        <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Additional FFmpeg', id: 'audio-ffmpeg'}) %>
-                    </div>
-                    <div class="panel-50 p-bottom-20 bottom-20">
-                        <h3>Sample rate offset</h3>
-                        <p>Using a negative value could eliminate audio buffering issues during long periods of listening. <br>
-                            However, a value that’s too low might increase the buffer over time.</p>
-                        <p><input class="panel-33 input-text w-100 auto" type="number" style="min-height: 40px; color: var(--color-text); padding: 10px; padding-left: 10px; box-sizing: border-box; border: 2px solid transparent; font-family: 'Titillium Web', sans-serif;" id="audio-samplerateOffset" min="-10" max="10" step="1" value="0" aria-label="Samplerate offset"></p>
-                    </div>
-                </div>
             </div>
 
             <div class="panel-full m-0 tab-content no-bg" id="webserver" role="tabpanel">
@@ -429,12 +403,10 @@
                                 <p>Toggling this option will put the tuner to sleep when no clients are connected.</p>
                                 <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Auto-shutdown', id: 'autoShutdown'}) %><br>
                             </div>
-                            <div class="flex-container">
-                                <div class="panel-50 no-bg">
-                                    <h4>SI47XX AGC control</h4>
-                                    <p>Allow users to change SI47XX AGC mode from the main UI.</p>
-                                    <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Enable AGC control', id: 'si47xx-agcControl'}) %><br>
-                                </div>
+                            <div class="panel-50 no-bg">
+                                <h4>SI47XX AGC control</h4>
+                                <p>Allow users to change SI47XX AGC mode from the main UI.</p>
+                                <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Enable AGC control', id: 'si47xx-agcControl'}) %><br>
                             </div>
                         </div>
                     </div>
