@@ -138,3 +138,5 @@ checkFFmpeg().then((ffmpegPath) => {
 }).catch((err) => {
     logError(`${consoleLogTitle} Error: ${err.message}`);
 });
+
+module.exports = audio_pipe;
