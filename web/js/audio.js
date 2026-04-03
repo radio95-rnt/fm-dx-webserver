@@ -15,6 +15,19 @@ class WebSocketAudioPlayer {
     }
   }
 
+  _syncToLive() {
+    if (!this.audio || !this.sourceBuffer) return;
+    const buffered = this.sourceBuffer.buffered;
+    if (buffered.length === 0) return;
+
+    const liveEdge = buffered.end(buffered.length - 1);
+    const lag = liveEdge - this.audio.currentTime;
+
+    if (lag > 1.5) {  // more than 1.5s behind live
+      this.audio.currentTime = liveEdge - 0.1;  // snap to near live edge
+    }
+  }
+
   start() {
     this.audio = new Audio();
     this.mediaSource = new MediaSource();
@@ -26,6 +39,8 @@ class WebSocketAudioPlayer {
         this._appendNext();
         this._trimBuffer();
       });
+      this.audio.addEventListener('waiting', () => this._syncToLive());
+      this.audio.addEventListener('stalled', () => this._syncToLive());
 
       this.ws = new WebSocket(this.url);
       this.ws.binaryType = 'arraybuffer';
@@ -59,6 +74,7 @@ class WebSocketAudioPlayer {
   _appendNext() {
     if (this.sourceBuffer.updating || this.queue.length === 0) return;
     this.sourceBuffer.appendBuffer(this.queue.shift());
+    this._syncToLive();
   }
 }
 
