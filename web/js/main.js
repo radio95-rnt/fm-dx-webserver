@@ -38,11 +38,8 @@ $(document).ready(function () {
         var mouseX = e.pageX;
         var panelLeft = parseInt($panel.css('left'));
 
-        if (mouseX <= 10 || (panelLeft === 4 && mouseX <= 100)) {
-            $panel.css('left', '4px');
-        } else {
-            $panel.css('left', -panelWidth);
-        }
+        if (mouseX <= 10 || (panelLeft === 4 && mouseX <= 100)) $panel.css('left', '4px');
+        else $panel.css('left', -panelWidth);
     });
 
     fillPresets();
@@ -50,13 +47,9 @@ $(document).ready(function () {
     signalToggle.on("change", function () {
         const signalText = localStorage.getItem('signalUnit');
 
-        if (signalText == 'dbuv') {
-            signalText.text('dBµV');
-        } else if (signalText == 'dbf') {
-            signalText.text('dBf');
-        } else {
-            signalText.text('dBm');
-        }
+        if (signalText == 'dbuv') signalText.text('dBµV');
+        else if (signalText == 'dbf') signalText.text('dBf');
+        else signalText.text('dBm');
     });
 
     // Check if device is an iPhone to prevent zoom on button press
@@ -76,11 +69,8 @@ $(document).ready(function () {
             let content = $viewportMeta.attr('content');
             let re = /maximum\-scale=[0-9\.]+/g;
 
-            if (re.test(content)) {
-                content = content.replace(re, 'maximum-scale=1.0');
-            } else {
-                content += ', maximum-scale=1.0';
-            }
+            if (re.test(content)) content = content.replace(re, 'maximum-scale=1.0');
+            else content += ', maximum-scale=1.0';
 
             $viewportMeta.attr('content', content);
         }
@@ -99,7 +89,6 @@ $(document).ready(function () {
     });
 
     textInput.on('keyup', function (event) {
-
         if (event.key !== 'Backspace' && localStorage.getItem('extendedFreqRange') != "true") {
             let inputValue = textInput.val();
             inputValue = inputValue.replace(/[^0-9.]/g, '');
@@ -119,18 +108,15 @@ $(document).ready(function () {
                 }
             }
         }
+
         if (event.key === 'Enter') {
-            if (socket.readyState === WebSocket.OPEN) {
-                tuneTo(textInput.val());
-            }
+            if (socket.readyState === WebSocket.OPEN) tuneTo(textInput.val());
             textInput.val('');
         }
     });
 
     document.onkeydown = function(event) {
-        if (!event.repeat) {
-            checkKey(event);
-        }
+        if (!event.repeat) checkKey(event);
     };
 
 
@@ -151,16 +137,11 @@ $(document).ready(function () {
         var delta = e.originalEvent.deltaY;
         var adjustment = 0;
 
-        if (e.shiftKey) {
-            adjustment = e.altKey ? 1 : 0.01;
-        } else if (e.ctrlKey) {
-            adjustment = 1;
-        } else {
-            if (delta > 0) {
-                tuneDown();
-            } else {
-                tuneUp();
-            }
+        if (e.shiftKey) adjustment = e.altKey ? 1 : 0.01;
+        else if (e.ctrlKey) adjustment = 1;
+        else {
+            if (delta > 0) tuneDown();
+            else tuneUp();
             return false;
         }
 
@@ -245,9 +226,7 @@ $(document).ready(function () {
                 if(parsedData.txInfo.dist > 700) sendLog('./log_fmlist?type=tropo');
                 $('.log-fmlist .mini-popup-content').removeClass('show');
             });
-        } else {
-            sendLog('./log_fmlist');
-        }
+        } else sendLog('./log_fmlist');
 
         function sendLog(endpoint) {
             $.ajax({
@@ -261,13 +240,13 @@ $(document).ready(function () {
 
                     switch (xhr.status) {
                         case 429:
-                        errorMessage = xhr.responseText;
-                        break;
+                            errorMessage = xhr.responseText;
+                            break;
                         case 500:
-                        errorMessage = 'Server error: ' + (xhr.responseText || 'Internal Server Error');
-                        break;
+                            errorMessage = 'Server error: ' + (xhr.responseText || 'Internal Server Error');
+                            break;
                         default:
-                        errorMessage = xhr.statusText || 'An error occurred';
+                            errorMessage = xhr.statusText || 'An error occurred';
                     }
 
                     sendToast('error', 'Log failed', errorMessage, false, true);
@@ -368,9 +347,7 @@ function sendPingRequest() {
             if (connectionLost) sendToast('warning', 'Connection lost', 'Attempting to reconnect...', false, false);
             console.log("Reconnecting due to no data received...");
         }
-    } else {
-        messageCounter = 0;
-    }
+    } else messageCounter = 0;
 
     // Automatic reconnection on WebSocket close with cooldown
     const now = Date.now();
@@ -414,9 +391,12 @@ function handleWebSocketMessage(event) {
         console.log('Kick initiated.')
         setTimeout(() => {
             window.location.href = '/403';
-        }, 350);
+        }, 100);
         return;
-    } else if (event.data.startsWith("!")) sendToast('info', 'Info from server', event.data.slice(1), false, false)
+    } else if (event.data.startsWith("!")) {
+        sendToast('info', 'Info from server', event.data.slice(1), false, false)
+        return;
+    }
 
     parsedData = JSON.parse(event.data);
 
@@ -427,6 +407,7 @@ function handleWebSocketMessage(event) {
     const averageSignal = sum / signalData.length;
     data.push(averageSignal);
 }
+
 // Attach the message handler
 socket.onmessage = handleWebSocketMessage;
 
@@ -627,7 +608,7 @@ socket.onmessage = (event) => {
         console.log('Kick initiated.');
         setTimeout(() => {
             window.location.href = '/403';
-        }, 500);
+        }, 100);
         return;
     }
 
@@ -642,6 +623,7 @@ socket.onmessage = (event) => {
 };
 
 function compareNumbers(a, b) {
+    // Really?
     return a - b;
 }
 
@@ -660,11 +642,8 @@ function processString(string, errors) {
 
     for (let i = 0; i < string.length; i++) {
         alpha = parseInt(errors[i]) * (alpha_range / (max_error + 1));
-        if (alpha) {
-            output += "<span style='opacity: " + (max_alpha - alpha) + "%'>" + escapeHTML(string[i]) + "</span>";
-        } else {
-            output += escapeHTML(string[i]);
-        }
+        if (alpha) output += "<span style='opacity: " + (max_alpha - alpha) + "%'>" + escapeHTML(string[i]) + "</span>";
+        else output += escapeHTML(string[i]);
     }
 
     return output;
@@ -734,23 +713,23 @@ function checkKey(e) {
 
                 let socketMessage = "Z" + $nextOption.data("value");
                 socket.send(socketMessage);
-            break;
+                break;
             case 112: // F1
                 e.preventDefault();
                 tuneTo(Number(localStorage.getItem('preset1')));
-            break;
+                break;
             case 113: // F2
                 e.preventDefault();
                 tuneTo(Number(localStorage.getItem('preset2')));
-            break;
+                break;
             case 114: // F3
                 e.preventDefault();
                 tuneTo(Number(localStorage.getItem('preset3')));
-            break;
+                break;
             case 115: // F4
                 e.preventDefault();
                 tuneTo(Number(localStorage.getItem('preset4')));
-            break;
+                break;
             default:
             // Handle default case if needed
             break;
@@ -840,7 +819,6 @@ function findOnMaps() {
     window.open(url, "_blank");
 }
 
-
 function updateSignalUnits(parsedData, averageSignal) {
     const signalUnit = localStorage.getItem('signalUnit');
     let currentSignal;
@@ -852,21 +830,19 @@ function updateSignalUnits(parsedData, averageSignal) {
 
     switch (signalUnit) {
         case 'dbuv':
-        signalValue = currentSignal - 11.25;
-        highestSignal = highestSignal - 11.25;
-        signalText.text('dBµV');
+            signalValue = currentSignal - 11.25;
+            highestSignal = highestSignal - 11.25;
+            signalText.text('dBµV');
         break;
-
         case 'dbm':
-        signalValue = currentSignal - 120;
-        highestSignal = highestSignal - 120;
-        signalText.text('dBm');
-        break;
-
+            signalValue = currentSignal - 120;
+            highestSignal = highestSignal - 120;
+            signalText.text('dBm');
+            break;
         default:
-        signalValue = currentSignal;
-        signalText.text('dBf');
-        break;
+            signalValue = currentSignal;
+            signalText.text('dBf');
+            break;
     }
 
     const formatted = (Math.round(signalValue * 10) / 10).toFixed(1);
@@ -942,21 +918,15 @@ function buildAltTxList(txList) {
 }
 
 function updateTextIfChanged($element, newText) {
-    if ($element.text() !== newText) {
-        $element.text(newText);
-    }
+    if ($element.text() !== newText) $element.text(newText);
 }
 
 function updateHtmlIfChanged($element, newHtml) {
-    if ($element.html() !== newHtml) {
-        $element.html(newHtml);
-    }
+    if ($element.html() !== newHtml) $element.html(newHtml);
 }
 
 function updateDatasetValIfChanged($element, dataLabel, newVal) {
-    if ($element.attr(dataLabel) !== newVal) {
-        $element.attr(dataLabel, newVal);
-    }
+    if ($element.attr(dataLabel) !== newVal) $element.attr(dataLabel, newVal);
 }
 
 // Main function to update data elements, optimized
@@ -970,18 +940,12 @@ const updateDataElements = throttle(function(parsedData) {
     }
     updateHtmlIfChanged($dataPs, parsedData.ps === '?' ? "<span class='opacity-half'>?</span>" : processString(parsedData.ps, parsedData.ps_errors));
 
-    if(parsedData.st) {
-        $dataSt.parent().removeClass('opacity-half');
-    } else {
-        $dataSt.parent().addClass('opacity-half');
-    }
+    if(parsedData.st) $dataSt.parent().removeClass('opacity-half');
+    else $dataSt.parent().addClass('opacity-half');
 
     if(parsedData.stForced) {
-        if (!parsedData.st) {
-            stereoColor = 'gray';
-        } else {
-            stereoColor = 'var(--color-4)';
-        }
+        if (!parsedData.st) stereoColor = 'gray';
+        else stereoColor = 'var(--color-4)';
         $('.data-st.circle1').css('left', '4px');
         $('.data-st.circle2').css('display', 'none');
     } else {
@@ -994,11 +958,8 @@ const updateDataElements = throttle(function(parsedData) {
 
     updateTextIfChanged($dataPty, rdsMode == 'true' ? usa_programmes[parsedData.pty] : europe_programmes[parsedData.pty]);
 
-    if (parsedData.rds === true) {
-        $flagDesktopCointainer.css('background-color', 'var(--color-2-transparent)');
-    } else {
-        $flagDesktopCointainer.css('background-color', 'var(--color-1-transparent)');
-    }
+    if (parsedData.rds === true) $flagDesktopCointainer.css('background-color', 'var(--color-2-transparent)');
+    else $flagDesktopCointainer.css('background-color', 'var(--color-1-transparent)');
 
     $('.data-flag').html(`<i title="${parsedData.country_name}" class="flag-sm flag-sm-${parsedData.country_iso}"></i>`);
     $('.data-flag-big').html(`<i title="${parsedData.country_name}" class="flag-md flag-md-${parsedData.country_iso}"></i>`);
@@ -1056,9 +1017,7 @@ function updatePanels(parsedData) {
     updateCounter = (updateCounter % 10000) + 1; // Count to 10000 then reset back to 1
 
     signalData.push(parsedData.sig);
-    if (signalData.length > 8) {
-        signalData.shift(); // Remove the oldest element
-    }
+    if (signalData.length > 8) signalData.shift(); // Remove the oldest element
     const sum = signalData.reduce((acc, strNum) => acc + parseFloat(strNum), 0);
     const averageSignal = sum / signalData.length;
 
@@ -1107,9 +1066,7 @@ function createListItem(element) {
 function updateButtonState(buttonId, value) {
     var button = $("#" + buttonId);
 
-    if (button.length === 0) {
-        button = $("." + buttonId);
-    }
+    if (button.length === 0) button = $("." + buttonId);
 
     if (button.length > 0) {
         if (value == 0) {
@@ -1119,9 +1076,7 @@ function updateButtonState(buttonId, value) {
             button.hasClass("btn-disabled") ? button.removeClass("btn-disabled") : null;
             button.attr('aria-description', 'On');
         }
-    } else {
-        console.log("Button not found!");
-    }
+    } else console.log("Button not found!");
 }
 
 
@@ -1182,9 +1137,7 @@ function initTooltips(target = null) {
     tooltips.off('mouseenter mouseleave');
 
     tooltips.hover(function () {
-        if ($(this).closest('.popup-content').length) {
-            return;
-        }
+        if ($(this).closest('.popup-content').length) return;
 
         var tooltipText = $(this).data('tooltip');
         var placement = $(this).data('tooltip-placement') || 'top'; // Default to 'top'
@@ -1212,22 +1165,22 @@ function initTooltips(target = null) {
                 var posX, posY;
                 switch (placement) {
                     case 'bottom':
-                    posX = targetOffset.left + targetWidth / 2 - tooltipWidth / 2;
-                    posY = targetOffset.top + targetHeight + 10;
-                    break;
+                        posX = targetOffset.left + targetWidth / 2 - tooltipWidth / 2;
+                        posY = targetOffset.top + targetHeight + 10;
+                        break;
                     case 'left':
-                    posX = targetOffset.left - tooltipWidth - 10;
-                    posY = targetOffset.top + targetHeight / 2 - tooltipHeight / 2;
-                    break;
+                        posX = targetOffset.left - tooltipWidth - 10;
+                        posY = targetOffset.top + targetHeight / 2 - tooltipHeight / 2;
+                        break;
                     case 'right':
-                    posX = targetOffset.left + targetWidth + 10;
-                    posY = targetOffset.top + targetHeight / 2 - tooltipHeight / 2;
-                    break;
+                        posX = targetOffset.left + targetWidth + 10;
+                        posY = targetOffset.top + targetHeight / 2 - tooltipHeight / 2;
+                        break;
                     case 'top':
                     default:
-                    posX = targetOffset.left + targetWidth / 2 - tooltipWidth / 2;
-                    posY = targetOffset.top - tooltipHeight - 10;
-                    break;
+                        posX = targetOffset.left + targetWidth / 2 - tooltipWidth / 2;
+                        posY = targetOffset.top - tooltipHeight - 10;
+                        break;
                 }
 
                 // Apply positioning
@@ -1269,12 +1222,8 @@ function initTooltips(target = null) {
                 $(`#preset${i}`).click(function() {
                     tuneTo(Number(presetText));
                 });
-            } else {
-                $(`#preset${i}`).hide();
-            }
+            } else $(`#preset${i}`).hide();
         }
 
-        if (!hasAnyPreset) {
-            $('#preset1').parent().hide();
-        }
+        if (!hasAnyPreset) $('#preset1').parent().hide();
     }

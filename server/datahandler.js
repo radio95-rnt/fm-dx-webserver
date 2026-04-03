@@ -130,7 +130,7 @@ function handleData(wss, receivedData, rdsWss) {
         dataToSend.agc = receivedLine.substring(1);
         initialData.agc = receivedLine.substring(1);
         break;
-      case receivedLine.startsWith('G'): // EQ / iMS (RF+/IF+)
+      case receivedLine.startsWith('G'): // EQ / iMS
         const mapping = filterMappings[receivedLine];
         if (mapping) {
           initialData.eq = mapping.eq;
@@ -149,13 +149,13 @@ function handleData(wss, receivedData, rdsWss) {
       case receivedLine.startsWith('Ss'):
         processSignal(receivedLine, true, false);
         break;
-      case receivedLine.startsWith('SS'):
+      case receivedLine.startsWith('SS'): // ss? oh no
         processSignal(receivedLine, true, true);
         break;
       case receivedLine.startsWith('SM'):
         processSignal(receivedLine, false, true);
         break;
-      case receivedLine.startsWith('R'): // RDS HEX
+      case receivedLine.startsWith('R'):
         rdsReceived();
         modifiedData = receivedLine.slice(1);
         dataToSend.rds = true;
@@ -202,9 +202,7 @@ function handleData(wss, receivedData, rdsWss) {
         legacyRdsPiBuffer = null;
         break;
       case receivedLine.startsWith("!"):
-        wss.clients.forEach((client) => {
-          client.send(receivedLine.trim());
-        });
+        wss.clients.forEach((client) => client.send(receivedLine.trim()));
         break;
     }
   }
@@ -236,9 +234,7 @@ function handleData(wss, receivedData, rdsWss) {
   // Send the updated data to the client
   const dataToSendJSON = JSON.stringify(dataToSend);
   if (currentTime - lastUpdateTime >= updateInterval) {
-    wss.clients.forEach((client) => {
-        client.send(dataToSendJSON);
-    });
+    wss.clients.forEach((client) => client.send(dataToSendJSON));
     lastUpdateTime = Date.now();
     serialportUpdateTime = process.hrtime();
   }
@@ -307,6 +303,4 @@ function processSignal(receivedData, st, stForced) {
   }
 }
 
-module.exports = {
-  handleData, showOnlineUsers, dataToSend, initialData, resetToDefault, state
-};
+module.exports = { handleData, showOnlineUsers, dataToSend, initialData, resetToDefault, state };

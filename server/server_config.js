@@ -187,6 +187,4 @@ if (configExists()) {
 }
 
 
-module.exports = {
-    configName, serverConfig, configUpdate, configSave, configExists, configPath
-};
+module.exports = { configName, serverConfig, configUpdate, configSave, configExists, configPath };

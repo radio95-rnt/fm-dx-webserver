@@ -2,13 +2,11 @@ const fs = require('fs');
 const path = require('path');
 const consoleCmd = require('./console');
 
-// Function to read all .js files in a directory
 function readJSFiles(dir) {
     const files = fs.readdirSync(dir);
     return files.filter(file => file.endsWith('.js'));
 }
 
-// Function to parse plugin config from a file
 function parsePluginConfig(filePath) {
     const pluginConfig = {};
 
@@ -75,10 +73,10 @@ if (!fs.existsSync(webJsPluginsDir)) fs.mkdirSync(webJsPluginsDir, { recursive: 
 
 // Main function to create symlinks/junctions for plugins
 function createLinks() {
-    const pluginsDir = path.join(__dirname, '../plugins');
-    const destinationPluginsDir = path.join(__dirname, '../web/js/plugins');
-
     if (process.platform === 'win32') {
+        const pluginsDir = path.join(__dirname, '../plugins');
+        const destinationPluginsDir = path.join(__dirname, '../web/js/plugins');
+
         // On Windows, create a junction
         try {
             if (fs.existsSync(destinationPluginsDir)) fs.rmSync(destinationPluginsDir, { recursive: true });
@@ -89,8 +87,6 @@ function createLinks() {
     }
 }
 
-// Usage example
-const allPluginConfigs = collectPluginConfigs();
+// the usage example comment that was here got me so laughing, that i don't know about all of this
 createLinks();
-
-module.exports = allPluginConfigs;
+module.exports = collectPluginConfigs();

@@ -28,12 +28,15 @@ const pjson = require('../package.json');
 const client = new net.Socket();
 const wss = new WebSocket.Server({ noServer: true });
 const rdsWss = new WebSocket.Server({ noServer: true });
+const rawComm = new WebSocket.Server({ noServer: true });
 const pluginsWss = new WebSocket.Server({ noServer: true, perMessageDeflate: true });
 
 storage.websocket_delegation.set("/text", wss);
 storage.websocket_delegation.set("/rds", rdsWss);
 storage.websocket_delegation.set("/rdsspy", rdsWss);
+storage.websocket_delegation.set("/rawcomm", rawComm);
 storage.websocket_delegation.set("/data_plugins", pluginsWss);
+require('./stream/ws.js');
 
 // Get all plugins from config and find corresponding server files
 const plugins = findServerFiles(serverConfig.plugins);
@@ -52,8 +55,6 @@ console.log('\x1b[32m\x1b[2mby Noobish @ \x1b[4mFMDX.org + KubaPro010\x1b[0m');
 console.log("v" + pjson.version)
 console.log('\x1b[90m' + '─'.repeat(terminalWidth - 1) + '\x1b[0m');
 
-require('./stream/ws.js');
-require('./stream/index');
 require('./plugins');
 
 let currentUsers = 0;
@@ -71,6 +72,7 @@ app.use(bodyParser.json());
 createChatServer(storage);
 
 tunnel.download();
+require('./stream/index');
 connectToXdrd();
 connectToSerial();
 
@@ -146,6 +148,9 @@ function connectToSerial() {
 
     serialport.on('data', (data) => {
       helpers.resolveDataBuffer(data, wss, rdsWss);
+      rawComm.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) client.send(data);
+      });
     });
 
     serialport.on('error', (error) => {
@@ -191,6 +196,9 @@ client.on('data', (data) => {
   const { xdrd } = serverConfig;
 
   helpers.resolveDataBuffer(data, wss, rdsWss);
+  rawComm.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) client.send(data);
+  });
   if (authFlags.authMsg == true && authFlags.messageCount > 1) return;
 
   authFlags.messageCount++;
@@ -268,10 +276,6 @@ client.on('error', (err) => {
   }
 });
 
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../views'));
-app.use('/', endpoints);
-
 const tunerLockTracker = new WeakMap();
 const ipConnectionCounts = new Map(); // Per-IP limit variables
 const ipLogTimestamps = new Map();
@@ -290,7 +294,20 @@ setInterval(() => {
       ipLogTimestamps.delete(ip);
     }
   }
-}, 60 * 60 * 1000); // Run every hour
+}, 30 * 60 * 1000); // Run every half hour
+
+rawComm.on('connection', (ws, request) => {
+  const output = serverConfig.xdrd.wirelessConnection ? client : serialport;
+  const { isAdminAuthenticated } = request.session || {};
+  if(!isAdminAuthenticated) {
+    ws.close(1008, "No admin");
+    return;
+  }
+
+  ws.on('message', (message) => {
+    output.write(`${message.toString()}\n`);
+  });
+});
 
 wss.on('connection', (ws, request) => {
     const output = serverConfig.xdrd.wirelessConnection ? client : serialport;
@@ -300,7 +317,7 @@ wss.on('connection', (ws, request) => {
     // Per-IP limit connection open
     if (clientIp) {
         const isLocalIp = (
-            clientIp === '127.0.0.1' || clientIp === '::1' || clientIp === '::ffff:127.0.0.1' ||
+            clientIp === '127.0.0.1' || clientIp === '::1' ||
             clientIp.startsWith('192.168.') || clientIp.startsWith('10.') || clientIp.startsWith('172.16.'));
         if (!isLocalIp) {
             if (!ipConnectionCounts.has(clientIp)) ipConnectionCounts.set(clientIp, 0);
@@ -402,7 +419,7 @@ wss.on('connection', (ws, request) => {
         }
       }
 
-      if (clientIp !== '::ffff:127.0.0.1' ||
+      if (clientIp !== ':127.0.0.1' ||
         (request.socket && request.socket.remoteAddress && request.socket.remoteAddress !== '::ffff:127.0.0.1') ||
         (request.headers && request.headers['origin'] && request.headers['origin'].trim() !== '')) {
         currentUsers--;
@@ -521,24 +538,23 @@ httpServer.on('upgrade', (request, socket, head) => {
   } else socket.destroy();
 });
 
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'));
+app.use('/', endpoints);
 app.use(express.static(path.join(__dirname, '../web'))); // Serve the entire web folder to the user
 pluginsApi.registerServerContext({ wss, pluginsWss, httpServer, serverConfig });
 
-const ipv4Address = serverConfig.webserver.webserverIp === '0.0.0.0' ? 'localhost' : serverConfig.webserver.webserverIp;
-const port = serverConfig.webserver.webserverPort;
-
 const logServerStart = (address) => {
-  logInfo(`Web server has started on address \x1b[34mhttp://${address}:${port}\x1b[0m.`);
+  logInfo(`Web server has started on address \x1b[34mhttp://${address}:${serverConfig.webserver.webserverPort}\x1b[0m.`);
 };
 
 const startServer = (address) => {
-  httpServer.listen(port, address, () => {
-    if (!configExists()) logInfo(`Open your browser and proceed to \x1b[34mhttp://${address}:${port}\x1b[0m to continue with setup.`);
+  httpServer.listen(serverConfig.webserver.webserverPort, address, () => {
+    if (!configExists()) logInfo(`Open your browser and proceed to \x1b[34mhttp://${address}:${serverConfig.webserver.webserverPort}\x1b[0m to continue with setup.`);
     else logServerStart(address);
   });
 };
 
-
-startServer(ipv4Address);
+startServer(serverConfig.webserver.webserverIp === '0.0.0.0' ? 'localhost' : serverConfig.webserver.webserverIp);
 tunnel.connect();
 fmdxList.update();

@@ -100,4 +100,4 @@ httpPassword = "<%= cfg.httpPassword %>"
 <% } %>
 `;
 
-module.exports = { connect, download};
+module.exports = { connect, download };

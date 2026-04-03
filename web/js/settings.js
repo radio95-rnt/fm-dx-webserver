@@ -42,9 +42,7 @@ $(document).ready(() => {
                 }, 1750);
             },
             error: function (xhr, status, error) {
-                if (xhr.status === 403) {
-                    sendToast('error', 'Login failed!', xhr.responseJSON.message, false, true);
-                }
+                if (xhr.status === 403) sendToast('error', 'Login failed!', xhr.responseJSON.message, false, true);
             }
         });
     });    
@@ -59,7 +57,7 @@ $(document).ready(() => {
                 sendToast('success', 'Logout success!', data.message, false, true);
                 setTimeout(function () {
                     location.reload(true);
-                }, 1000);
+                }, 500);
             },
             error: function (xhr, status, error) {
                 if (xhr.status === 403) {
@@ -102,7 +100,6 @@ function setTheme(themeName) {
         // Extracting the RGBA components from themeColors[2] for --color-text-2
         const rgbaComponentsText = themeColors[2].match(/(\d+(\.\d+)?)/g);
         const opacityText = parseFloat(rgbaComponentsText[3]);
-        const newOpacityText = opacityText * 0.75;
         const textColor2 = `rgba(${rgbaComponentsText[0]}, ${rgbaComponentsText[1]}, ${rgbaComponentsText[2]})`;
 
         // Extracting the RGBA components from themeColors[0] for background color
@@ -123,9 +120,7 @@ function setBg() {
     const disableBackgroundParameter = getQueryParameter('disableBackground');
     if(localStorage.getItem('bgImage').length > 5 && localStorage.getItem('theme') != 'theme9' && disableBackgroundParameter != 'true') {
         $('body').css('background', 'url(' + localStorage.getItem('bgImage') + ') top center / cover fixed no-repeat var(--color-main)');
-    } else {
-        $('body').css('background', 'var(--color-main)');
-    }
+    } else $('body').css('background', 'var(--color-main)');
 }
 
 function getInitialSettings() {
@@ -135,14 +130,10 @@ function getInitialSettings() {
         success: function (data) {
 
             ['qthLatitude', 'qthLongitude', 'defaultTheme', 'bgImage', 'rdsMode', 'rdsTimeout'].forEach(key => {
-                if (data[key] !== undefined) {
-                    localStorage.setItem(key, data[key]);
-                }
+                if (data[key] !== undefined) localStorage.setItem(key, data[key]);
             });
             
-            data.presets.forEach((preset, index) => {
-                localStorage.setItem(`preset${index + 1}`, preset);
-            });
+            data.presets.forEach((preset, index) => localStorage.setItem(`preset${index + 1}`, preset));
 
             loadInitialSettings();
         },

@@ -15,11 +15,6 @@ $(document).ready(function() {
   setInterval(checkTunnelServers, 10000);
 });
 
-/**
- * Function to create & handle maps.
- * Also contains map handling such as reloading / pin click registering.
- */
-
 function mapCreate() {
   if (!(typeof map == "object")) {
     map = L.map('map', {

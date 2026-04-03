@@ -17,7 +17,7 @@ class WebSocketAudioPlayer {
     const liveEdge = buffered.end(buffered.length - 1);
     const lag = liveEdge - this.audio.currentTime;
 
-    if (lag > .5) this.audio.currentTime = liveEdge - 0.1;  // snap to near live edge
+    if (lag > .3) this.audio.currentTime = liveEdge - 0.1;  // snap to near live edge
   }
 
   start() {
@@ -111,7 +111,7 @@ function OnPlayButtonClick(_ev) {
     }
 
     $playbutton.addClass('bg-gray').prop('disabled', true);
-    setTimeout(() => $playbutton.removeClass('bg-gray').prop('disabled', false), 2500);
+    setTimeout(() => $playbutton.removeClass('bg-gray').prop('disabled', false), 2000);
     if (Stream) Stream.setVolume($("#volumeSlider").val());
 }
 

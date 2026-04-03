@@ -18,6 +18,9 @@ function submitConfig() {
     data: JSON.stringify(configData),
     success: function (message) {
       sendToast('success', 'Data saved!', message, true, true);
+      setTimeout(function () {
+        location.reload(true);
+      }, 1500);
     },
     error: function (error) {
       console.error(error);

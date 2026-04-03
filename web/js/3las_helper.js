@@ -2,6 +2,9 @@
     Helpers is part of 3LAS (Low Latency Live Audio Streaming)
     https://github.com/JoJoBond/3LAS
 */
+
+// Terrible
+
 var isAndroid;
 var isIOS;
 var isIPadOS;
