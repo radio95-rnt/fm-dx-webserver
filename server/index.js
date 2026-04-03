@@ -319,7 +319,7 @@ wss.on('connection', (ws, request) => {
         }
     }
 
-    if (clientIp !== '::ffff:127.0.0.1' ||
+    if (clientIp !== '127.0.0.1' ||
       (request.socket && request.socket.remoteAddress && request.socket.remoteAddress !== '::ffff:127.0.0.1') ||
       (request.headers && request.headers['origin'] && request.headers['origin'].trim() !== '')) {
       currentUsers++;
@@ -392,7 +392,6 @@ wss.on('connection', (ws, request) => {
         const isLocalIp = (
           clientIp === '127.0.0.1' ||
           clientIp === '::1' ||
-          clientIp === '::ffff:127.0.0.1' ||
           clientIp.startsWith('192.168.') ||
           clientIp.startsWith('10.') ||
           clientIp.startsWith('172.16.')

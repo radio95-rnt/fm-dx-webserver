@@ -22,9 +22,9 @@ router.get('/', (req, res) => {
     let requestIp = helpers.getIpAddress(req);
 
     const ipList = (requestIp || '').split(',').map(ip => ip.trim()).filter(Boolean); // in case there are multiple IPs (proxy), we need to check all of them (No we don't)
-    
+
     const banEntry = serverConfig.webserver.banlist.find(banEntry => ipList.includes(banEntry[0]));
-    
+
     if (banEntry) {
         const reason = banEntry[3];
         res.render('403', { reason });
@@ -36,14 +36,14 @@ router.get('/', (req, res) => {
 
     if (configExists() === false) {
         let serialPorts;
-        
+
         SerialPort.list()
         .then((deviceList) => {
             serialPorts = deviceList.map(port => ({
                 path: port.path,
                 friendlyName: port.friendlyName,
             }));
-            
+
             parseAudioDevice((result) => {
                 res.render('wizard', { // Magical utility wizard
                     isAdminAuthenticated: true,
@@ -91,9 +91,13 @@ router.get('/403', (req, res) => {
     res.render('403', { reason });
 })
 
+router.get('/audioonly', (req, res) => {
+    res.render('audioonly');
+})
+
 router.get('/wizard', (req, res) => {
     let serialPorts;
-    
+
     if(!req.session.isAdminAuthenticated) {
         res.render('login');
         return;
@@ -105,7 +109,7 @@ router.get('/wizard', (req, res) => {
             path: port.path,
             friendlyName: port.friendlyName,
         }));
-        
+
         parseAudioDevice((result) => {
             res.render('wizard', {
                 isAdminAuthenticated: req.session.isAdminAuthenticated,
@@ -121,9 +125,9 @@ router.get('/wizard', (req, res) => {
         });
     })
 })
-  
+
 router.get('/setup', (req, res) => {
-    let serialPorts; 
+    let serialPorts;
     function loadConfig() {
         if (fs.existsSync(configPath)) {
             const configFileContents = fs.readFileSync(configPath, 'utf8');
@@ -136,18 +140,18 @@ router.get('/setup', (req, res) => {
         res.render('login');
         return;
     }
-    
+
     SerialPort.list()
     .then((deviceList) => {
         serialPorts = deviceList.map(port => ({
             path: port.path,
             friendlyName: port.friendlyName,
         }));
-        
+
         parseAudioDevice((result) => {
             const processUptimeInSeconds = Math.floor(process.uptime());
             const formattedProcessUptime = helpers.formatUptime(processUptimeInSeconds);
-            
+
             const updatedConfig = loadConfig();  // Reload the config every time
             res.render('setup', {
                 isAdminAuthenticated: req.session.isAdminAuthenticated,
@@ -171,9 +175,9 @@ router.get('/setup', (req, res) => {
                 }))
             });
         });
-    }) 
+    })
 });
-  
+
 
 router.get('/rds', (req, res) => {
     res.send('Please connect using a WebSocket compatible app to obtain the RDS stream.');
@@ -197,7 +201,7 @@ router.get('/api', (req, res) => {
 
 const loginAttempts = {}; // Format: { 'ip': { count: 1, lastAttempt: 1234567890 } }
 const MAX_ATTEMPTS = 10;
-const WINDOW_MS = 15 * 60 * 1000; 
+const WINDOW_MS = 15 * 60 * 1000;
 
 const authenticate = (req, res, next) => {
     const ip = helpers.getIpAddress(req);
@@ -305,7 +309,7 @@ router.post('/saveData', (req, res) => {
     if(req.session.isAdminAuthenticated || !configExists()) {
         configUpdate(data);
         fmdxList.update();
-        
+
         if(!configExists()) firstSetup = true;
         logInfo('Server config changed successfully.');
         if(firstSetup === true) res.status(200).send('Data saved successfully!\nPlease, restart the server to load your configuration.');
@@ -313,9 +317,9 @@ router.post('/saveData', (req, res) => {
     }
 });
 
-router.get('/getData', (req, res) => {  
+router.get('/getData', (req, res) => {
     if (configExists() === false) res.json(serverConfig);
-    
+
     if(req.session.isAdminAuthenticated) {
         // Check if the file exists
         fs.access(configPath, fs.constants.F_OK, (err) => {
@@ -360,7 +364,7 @@ router.get('/server_time', (req, res) => {
 
 router.get('/ping', (req, res) => {
     res.send('pong');
-});  
+});
 
 const logHistory = {};
 
@@ -368,27 +372,27 @@ const logHistory = {};
 function canLog(id) {
     const now = Date.now();
     const sixtyMinutes = 60 * 60 * 1000; // 60 minutes in milliseconds
-    
+
     // Remove expired entries
     for (const [entryId, timestamp] of Object.entries(logHistory)) {
         if ((now - timestamp) >= sixtyMinutes) {
             delete logHistory[entryId];
         }
     }
-    
+
     if (logHistory[id] && (now - logHistory[id]) < sixtyMinutes) return false; // Deny logging if less than 60 minutes have passed
     logHistory[id] = now; // Update with the current timestamp
     return true;
 }
 
 router.get('/log_fmlist', (req, res) => {
-    if (dataHandler.dataToSend.txInfo.tx.length === 0) {
-        res.status(500).send('No suitable transmitter to log.');
+    if (serverConfig.extras.fmlistIntegration === false || (serverConfig.extras.fmlistAdminOnly && !req.session.isTuneAuthenticated)) {
+        res.status(500).send('FMLIST Integration is not available.');
         return;
     }
 
-    if (serverConfig.extras.fmlistIntegration === false || (serverConfig.extras.fmlistAdminOnly && !req.session.isTuneAuthenticated)) {
-        res.status(500).send('FMLIST Integration is not available.');
+    if (dataHandler.dataToSend.txInfo.tx.length === 0) {
+        res.status(500).send('No suitable transmitter to log.');
         return;
     }
 
@@ -468,7 +472,7 @@ router.get('/tunnelservers', async (req, res) => {
       { value: "sg", host: "sg.fmtuner.org", label: "Asia & Oceania" },
       { value: "pldx", host: "pldx.duckdns.org", label: "Poland (k201)" },
     ];
-  
+
     const results = await Promise.all(
       servers.map(async s => {
         const latency = await helpers.checkLatency(s.host);
@@ -478,7 +482,7 @@ router.get('/tunnelservers', async (req, res) => {
         };
       })
     );
-  
+
     res.json(results);
   });
 

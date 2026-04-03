@@ -77,8 +77,7 @@ function Init(_ev) {
 function createStream() {
     try {
         const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const audioUrl = `${wsProtocol}//${location.hostname}/audio`;
-        Stream = new WebSocketAudioPlayer(audioUrl);
+        Stream = new WebSocketAudioPlayer(`${wsProtocol}//${location.hostname}/audio`);
         Stream.setVolume($('#volumeSlider').val());
     } catch (error) {
         console.error("Initialization Error: ", error);
@@ -100,14 +99,14 @@ function OnPlayButtonClick(_ev) {
         console.log("Stopping stream...");
         shouldReconnect = false;
         destroyStream();
-        $playbutton.find('.fa-solid').toggleClass('fa-stop fa-play');
+        $playbutton.find('.fa-solid')?.toggleClass('fa-stop fa-play');
         if (isAppleiOS && 'audioSession' in navigator) navigator.audioSession.type = "none";
     } else {
         console.log("Starting stream...");
         shouldReconnect = true;
         createStream();
         Stream.start();
-        $playbutton.find('.fa-solid').toggleClass('fa-play fa-stop');
+        $playbutton.find('.fa-solid')?.toggleClass('fa-play fa-stop');
         if (isAppleiOS && 'audioSession' in navigator) navigator.audioSession.type = "playback";
     }
 
