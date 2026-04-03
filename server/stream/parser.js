@@ -107,4 +107,4 @@ function parseAudioDevice(options, callback) {
     else return new Promise(execute);
 }
 
-module.exports = { parseAudioDevice };
+module.exports = parseAudioDevice;

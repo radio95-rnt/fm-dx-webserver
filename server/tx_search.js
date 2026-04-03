@@ -4,7 +4,7 @@ const consoleCmd = require('./console');
 
 let localDb = {};
 let nextLocalDbUpdate = 0;
-const localDbUpdateInterval = 7 * 24 * 60 * 60 * 1000; // 7-day database update interval
+const localDbUpdateInterval = 3 * 24 * 60 * 60 * 1000; // 3-day database update interval
 let awaitingTxInfo = true;
 let lastFetchTime = 0;
 let piFreqIndex = {}; // Indexing for speedier PI+Freq combinations
@@ -17,11 +17,6 @@ const usStatesGeoJsonUrl = "https://raw.githubusercontent.com/PublicaMundi/Mappi
 let usStatesGeoJson = null;  // To cache the GeoJSON data for US states
 let Latitude = serverConfig.identification.lat;
 let Longitude = serverConfig.identification.lon;
-
-// Create WebSocket URL for GPS lat/lon update.
-const webserverPort = serverConfig.webserver.webserverPort || 8080; // Fallback to port 8080
-const externalWsUrl = `ws://127.0.0.1:${webserverPort}/data_plugins`;
-const WebSocket = require('ws'); 
 
 // Get weighting values based on algorithm setting.
 // Defaults = algorithm 1

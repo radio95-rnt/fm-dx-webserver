@@ -1,7 +1,3 @@
-// WebSocket connection located in ./websocket.js
-
-
-
 var parsedData, signalChart, previousFreq;
 var data = [];
 var signalData = [];

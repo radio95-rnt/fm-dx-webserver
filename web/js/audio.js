@@ -9,6 +9,12 @@ class WebSocketAudioPlayer {
     this.started = false;
   }
 
+  _trimBuffer() {
+    if (!this.sourceBuffer.updating && this.audio.currentTime > 5) {
+        this.sourceBuffer.remove(0, this.audio.currentTime - 2);
+    }
+  }
+
   start() {
     this.audio = new Audio();
     this.mediaSource = new MediaSource();
@@ -20,11 +26,11 @@ class WebSocketAudioPlayer {
 
       this.ws = new WebSocket(this.url);
       this.ws.binaryType = 'arraybuffer';
-      this.ws.onopen = () => this.ws.send(JSON.stringify({ type: 'fallback', data: 'mp3' }));
       this.ws.onmessage = (event) => {
         this.queue.push(event.data);
         this._appendNext();
         if (!this.started && this.queue.length === 0) { this.audio.play(); this.started = true; }
+        this._trimBuffer();
       };
       this.ws.onclose = () => {
         if (this.mediaSource.readyState === 'open') this.mediaSource.endOfStream();
@@ -99,7 +105,7 @@ function OnPlayButtonClick(_ev) {
     }
 
     $playbutton.addClass('bg-gray').prop('disabled', true);
-    setTimeout(() => $playbutton.removeClass('bg-gray').prop('disabled', false), 3000);
+    setTimeout(() => $playbutton.removeClass('bg-gray').prop('disabled', false), 2500);
 }
 
 function updateVolume() {
@@ -109,3 +115,4 @@ function updateVolume() {
 }
 
 $(document).ready(Init);
+window.addEventListener('load', Init, false);

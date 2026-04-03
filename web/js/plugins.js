@@ -19,8 +19,6 @@ function checkScroll() {
     }
 }
 
-
-
 $(document).ready(function () {
     let $container = $(".scrollable-container");
     let $leftArrow = $(".scroll-left");

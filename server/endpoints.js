@@ -7,7 +7,7 @@ const path = require('path');
 const https = require('https');
 
 // File Imports
-const { parseAudioDevice } = require('./stream/parser');
+const parseAudioDevice = require('./stream/parser');
 const { configName, serverConfig, configUpdate, configSave, configExists, configPath } = require('./server_config');
 const helpers = require('./helpers');
 const storage = require('./storage');

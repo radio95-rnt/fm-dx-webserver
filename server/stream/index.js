@@ -3,6 +3,7 @@ const { serverConfig } = require('../server_config');
 const { logDebug, logError, logInfo, logWarn, logFfmpeg } = require('../console');
 const checkFFmpeg = require('./checkFFmpeg');
 const { PassThrough } = require('stream');
+const storage = require('../storage');
 
 const consoleLogTitle = '[Audio Stream]';
 
@@ -41,14 +42,14 @@ checkFFmpeg().then((ffmpegPath) => {
         else inputArgs = ["-f", "alsa", "-i", device];
 
         return [
-            "-fflags", "+nobuffer",
+            "-fflags", "+nobuffer+flush_packets",
             "-flags", "low_delay",
-            "-rtbufsize", "6144",
-            "-probesize", "256",
+            "-rtbufsize", "4096",
+            "-probesize", "128",
 
             ...inputArgs,
 
-            "-thread_queue_size", "2048",
+            "-thread_queue_size", "1024",
             "-ar", String(sampleRate),
             "-ac", String(channels),
 
@@ -62,7 +63,7 @@ checkFFmpeg().then((ffmpegPath) => {
             "-id3v2_version", "0",
 
             "-fflags", "+nobuffer",
-            // "-flush_packets", "1",
+            "-flush_packets", "1",
 
             "pipe:1"
         ];
@@ -139,4 +140,4 @@ checkFFmpeg().then((ffmpegPath) => {
     logError(`${consoleLogTitle} Error: ${err.message}`);
 });
 
-module.exports = audio_pipe;
+storage.websocket_delegation.set("/audio", audioWss);

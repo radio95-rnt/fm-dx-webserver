@@ -19,11 +19,6 @@ function createChatServer(storage) {
         const clientIp = helpers.getIpAddress(request);
         const userCommandHistory = {};
 
-        if (serverConfig.webserver.banlist?.includes(clientIp)) {
-            ws.close(1008, 'Banned IP');
-            return;
-        }
-
         // Send chat history safely
         storage.chatHistory.forEach((message) => {
             const historyMessage = { ...message, history: true };
@@ -77,7 +72,10 @@ function createChatServer(storage) {
             const now = new Date();
             messageData.time = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
 
-            if (serverConfig.webserver.banlist?.includes(clientIp)) return;
+            if (serverConfig.webserver.banlist?.includes(clientIp)) {
+                ws.close(1008, 'Banned IP');
+                return;
+            }
 
             if (request.session?.isAdminAuthenticated === true) messageData.admin = true;
             if (messageData.nickname?.length > 32) messageData.nickname = messageData.nickname.substring(0, 32);

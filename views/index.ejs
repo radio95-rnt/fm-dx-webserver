@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title><%= tunerName %> - FM-DX Webserver</title>
   <link href="css/entry.css" type="text/css" rel="stylesheet">
   <link href="css/flags.min.css" type="text/css" rel="stylesheet">
   <link href="css/libs/fontawesome.css" type="text/css" rel="stylesheet">
   <link href="css/libs/jquery-ui.min.css" type="text/css" rel="stylesheet">
-  <!--<link href="css/libs/jquery-ui.theme.min.css" type="text/css" rel="stylesheet">-->
   <script src="js/libs/jquery.min.js"></script>
   <script src="js/libs/jquery-ui.min.js"></script>
   <script src="js/libs/chart.umd.min.js"></script>
@@ -26,7 +24,6 @@
   <script src="js/audio.js"></script>
   <script src="js/3las_helper.js"></script>
   <script type="text/javascript">
-    window.addEventListener('load', Init, false);
     document.ontouchmove = function(e) {
       e.preventDefault();
     }
@@ -550,9 +547,6 @@
             </div>
           </div>
           <div class="modal-panel-content">
-            <div class="hover-brighten br-0 bg-color-1" style="height: 50px;padding:12px;" onclick="window.open('https://buymeacoffee.com/noobish')">
-              <strong>Support</strong> the developer!
-            </div>
             <div class="hover-brighten br-0 bg-color-1" style="height: 50px;padding:12px;" onclick="window.open('https://discord.gg/cY66nt6UhV')">
               Join our <strong>FMDX.org Discord</strong> community!
             </div>

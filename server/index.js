@@ -42,7 +42,7 @@ const plugins = findServerFiles(serverConfig.plugins);
 if (plugins.length > 0) {
   setTimeout(() => {
     startPluginsWithDelay(plugins, 3000); // Start plugins with 3 seconds interval
-  }, 3000); // Initial delay of 3 seconds for the first plugin
+  }, 4000); // Initial delay of 4 seconds for the first plugin
 }
 
 const terminalWidth = readline.createInterface({input: process.stdin, output: process.stdout}).output.columns;
@@ -52,8 +52,7 @@ console.log('\x1b[32m\x1b[2mby Noobish @ \x1b[4mFMDX.org + KubaPro010\x1b[0m');
 console.log("v" + pjson.version)
 console.log('\x1b[90m' + '─'.repeat(terminalWidth - 1) + '\x1b[0m');
 
-const audioWss = require('./stream/ws.js');
-storage.websocket_delegation.set("/audio", audioWss);
+require('./stream/ws.js');
 require('./stream/index');
 require('./plugins');
 
@@ -97,16 +96,13 @@ setInterval(() => {
 function connectToSerial() {
   if (serverConfig.xdrd.wirelessConnection === true) return;
 
-  // Configure the SerialPort with DTR and RTS options
   serialport = new SerialPort({
     path: serverConfig.xdrd.comPort,
     baudRate: 115200,
-    autoOpen: false, // Prevents automatic opening
-    dtr: false, // Disable DTR
-    rts: false  // Disable RTS
+    autoOpen: false,
+    dtr: false, rts: false
   });
 
-  // Open the port manually after configuring DTR and RTS
   serialport.open((err) => {
     if (err) {
       logError('Error opening port: ' + err.message);
@@ -121,7 +117,7 @@ function connectToSerial() {
     pluginsApi.setOutput(serialport);
     setTimeout(() => {
         serialport.write('x\n');
-    }, 3000);
+    }, 2500);
 
     setTimeout(() => {
       serialport.write('Q0\n');
@@ -141,13 +137,8 @@ function connectToSerial() {
       serialport.write('F-1\n');
       serialport.write('W0\n');
       serverConfig.webserver.rdsMode ? serialport.write('D1\n') : serialport.write('D0\n');
-      // cEQ and iMS combinations
-      if (serverConfig.ceqStartup === "0" && serverConfig.imsStartup === "0") serialport.write("G00\n"); // Both Disabled
-      else if (serverConfig.ceqStartup === "1" && serverConfig.imsStartup === "0") serialport.write(`G10\n`);
-      else if (serverConfig.ceqStartup === "0" && serverConfig.imsStartup === "1") serialport.write(`G01\n`);
-      else if (serverConfig.ceqStartup === "1" && serverConfig.imsStartup === "1") serialport.write("G11\n"); // Both Enabled
-      // Handle stereo mode
-      if (serverConfig.stereoStartup === "1") serialport.write("B1\n"); // Mono
+      serialport.write(`G${serverConfig.ceqStartup}${serverConfig.imsStartup}\n`);
+      serialport.write(`B${serverConfig.stereoStartup}\n`); // Mono
       serverConfig.audio.startupVolume
         ? serialport.write('Y' + (serverConfig.audio.startupVolume * 100).toFixed(0) + '\n')
         : serialport.write('Y100\n');
@@ -223,11 +214,10 @@ client.on('data', (data) => {
         authFlags.authMsg = true;
         logInfo('Authentication with xdrd successful.');
       } else if (line.startsWith('G')) {
-        const value = line.substring(1);
-        dataHandler.initialData.eq = value.charAt(0);
-        dataHandler.dataToSend.eq = value.charAt(0);
-        dataHandler.initialData.ims = value.charAt(1);
-        dataHandler.dataToSend.ims = value.charAt(1);
+        dataHandler.initialData.eq = line.charAt(1);
+        dataHandler.dataToSend.eq = line.charAt(1);
+        dataHandler.initialData.ims = line.charAt(2);
+        dataHandler.dataToSend.ims = line.charAt(2);
       } else if (line.startsWith('Z')) {
         let modifiedLine = line.slice(1);
         dataHandler.initialData.ant = modifiedLine;
@@ -306,13 +296,6 @@ wss.on('connection', (ws, request) => {
     const output = serverConfig.xdrd.wirelessConnection ? client : serialport;
     let clientIp = helpers.getIpAddress(request);
     const userCommandHistory = {};
-  
-    if (clientIp && serverConfig.webserver.banlist?.includes(clientIp)) {
-        ws.close(1008, 'Banned IP');
-        return;
-    }
-
-    if (clientIp && clientIp.includes(',')) clientIp = clientIp.split(',')[0].trim();
 
     // Per-IP limit connection open
     if (clientIp) {
@@ -336,8 +319,8 @@ wss.on('connection', (ws, request) => {
         }
     }
 
-    if (clientIp !== '::ffff:127.0.0.1' || 
-      (request.socket && request.socket.remoteAddress && request.socket.remoteAddress !== '::ffff:127.0.0.1') || 
+    if (clientIp !== '::ffff:127.0.0.1' ||
+      (request.socket && request.socket.remoteAddress && request.socket.remoteAddress !== '::ffff:127.0.0.1') ||
       (request.headers && request.headers['origin'] && request.headers['origin'].trim() !== '')) {
       currentUsers++;
     }
@@ -420,8 +403,8 @@ wss.on('connection', (ws, request) => {
         }
       }
 
-      if (clientIp !== '::ffff:127.0.0.1' || 
-        (request.socket && request.socket.remoteAddress && request.socket.remoteAddress !== '::ffff:127.0.0.1') || 
+      if (clientIp !== '::ffff:127.0.0.1' ||
+        (request.socket && request.socket.remoteAddress && request.socket.remoteAddress !== '::ffff:127.0.0.1') ||
         (request.headers && request.headers['origin'] && request.headers['origin'].trim() !== '')) {
         currentUsers--;
       }
@@ -490,10 +473,6 @@ wss.on('connection', (ws, request) => {
 pluginsWss.on('connection', (ws, request) => {
     const clientIp = helpers.getIpAddress(request);
     const userCommandHistory = {};
-    if (serverConfig.webserver.banlist?.includes(clientIp)) {
-      ws.close(1008, 'Banned IP');
-      return;
-    }
     // Anti-spam tracking for each client
     const userCommands = {};
     let lastWarn = { time: 0 };
@@ -504,7 +483,7 @@ pluginsWss.on('connection', (ws, request) => {
 
         try {
             let messageData = JSON.parse(message); // Attempt to parse the JSON
-                        
+
             if (messageData.type === "GPS" && messageData.value) {
                 const gpsData = messageData.value;
                 const { status, time, lat, lon, alt, mode } = gpsData;
@@ -515,7 +494,7 @@ pluginsWss.on('connection', (ws, request) => {
                 }
             }
         } catch (error) {}
-        
+
         // Broadcast the message to all other clients
         pluginsWss.clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) client.send(message); // Send the message to all clients
@@ -527,14 +506,13 @@ pluginsWss.on('connection', (ws, request) => {
     });
 });
 
-httpServer.on('upgrade', (request, socket, head) => { 
-  const clientIp = helpers.getIpAddress(request);
-  if (serverConfig.webserver.banlist?.includes(clientIp)) {
+httpServer.on('upgrade', (request, socket, head) => {
+  if (serverConfig.webserver.banlist?.includes(helpers.getIpAddress(request))) {
     socket.destroy();
     return;
   }
 
-  const upgradeWss = storage.websocket_delegation.get(request.url);  
+  const upgradeWss = storage.websocket_delegation.get(request.url);
   if(upgradeWss) {
     sessionMiddleware(request, {}, () => {
       upgradeWss.handleUpgrade(request, socket, head, (ws) => {
@@ -565,4 +543,3 @@ const startServer = (address) => {
 startServer(ipv4Address);
 tunnel.connect();
 fmdxList.update();
-module.exports = { wss, pluginsWss, httpServer, serverConfig };
