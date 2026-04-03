@@ -28,13 +28,11 @@ const pjson = require('../package.json');
 const client = new net.Socket();
 const wss = new WebSocket.Server({ noServer: true });
 const rdsWss = new WebSocket.Server({ noServer: true });
-const rawComm = new WebSocket.Server({ noServer: true });
 const pluginsWss = new WebSocket.Server({ noServer: true, perMessageDeflate: true });
 
 storage.websocket_delegation.set("/text", wss);
 storage.websocket_delegation.set("/rds", rdsWss);
 storage.websocket_delegation.set("/rdsspy", rdsWss);
-storage.websocket_delegation.set("/rawcomm", rawComm);
 storage.websocket_delegation.set("/data_plugins", pluginsWss);
 require('./stream/ws.js');
 
@@ -148,9 +146,6 @@ function connectToSerial() {
 
     serialport.on('data', (data) => {
       helpers.resolveDataBuffer(data, wss, rdsWss);
-      rawComm.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) client.send(data);
-      });
     });
 
     serialport.on('error', (error) => {
@@ -196,9 +191,6 @@ client.on('data', (data) => {
   const { xdrd } = serverConfig;
 
   helpers.resolveDataBuffer(data, wss, rdsWss);
-  rawComm.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) client.send(data);
-  });
   if (authFlags.authMsg == true && authFlags.messageCount > 1) return;
 
   authFlags.messageCount++;
@@ -295,19 +287,6 @@ setInterval(() => {
     }
   }
 }, 30 * 60 * 1000); // Run every half hour
-
-rawComm.on('connection', (ws, request) => {
-  const output = serverConfig.xdrd.wirelessConnection ? client : serialport;
-  const { isAdminAuthenticated } = request.session || {};
-  if(!isAdminAuthenticated) {
-    ws.close(1008, "No admin");
-    return;
-  }
-
-  ws.on('message', (message) => {
-    output.write(`${message.toString()}\n`);
-  });
-});
 
 wss.on('connection', (ws, request) => {
     const output = serverConfig.xdrd.wirelessConnection ? client : serialport;

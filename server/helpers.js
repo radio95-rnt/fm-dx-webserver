@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const http = require('http');
 const https = require('https');
 const net = require('net');
 const crypto = require('crypto');
@@ -8,6 +7,24 @@ const dataHandler = require('./datahandler');
 const storage = require('./storage');
 const consoleCmd = require('./console');
 const { serverConfig, configSave } = require('./server_config');
+
+const WebSocket = require('ws');
+const rawComm = new WebSocket.Server({ noServer: true });
+
+rawComm.on('connection', (ws, request) => {
+  const output = serverConfig.xdrd.wirelessConnection ? client : serialport;
+  const { isAdminAuthenticated } = request.session || {};
+  if(!isAdminAuthenticated) {
+    ws.close(1008, "No admin");
+    return;
+  }
+
+  ws.on('message', (message) => {
+    output.write(`${message.toString()}\n`);
+  });
+});
+
+storage.websocket_delegation.set("/rawcomm", rawComm);
 
 let geoip = null;
 try {
@@ -274,7 +291,12 @@ function resolveDataBuffer(data, wss, rdsWss) {
     }
   } else incompleteDataBuffer = '';
 
-  if (receivedData.length) dataHandler.handleData(wss, receivedData, rdsWss);
+  if (receivedData.length) {
+    dataHandler.handleData(wss, receivedData, rdsWss);
+    rawComm.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) client.send(receivedData);
+    });
+  }
 }
 
 function kickClient(ipAddress) {
