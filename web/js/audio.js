@@ -112,7 +112,7 @@ function OnPlayButtonClick(_ev) {
 
     $playbutton.addClass('bg-gray').prop('disabled', true);
     setTimeout(() => $playbutton.removeClass('bg-gray').prop('disabled', false), 2500);
-    Stream.setVolume($("#volumeSlider").val());
+    if (Stream) Stream.setVolume($("#volumeSlider").val());
 }
 
 function updateVolume() {
