@@ -7,7 +7,7 @@ const dataHandler = require('./datahandler');
 const storage = require('./storage');
 const consoleCmd = require('./console');
 const { serverConfig, configSave } = require('./server_config');
-const send_to_xrd = require("./xrd_server")
+const { send_to_xrd } = require("./xrd_server")
 
 let geoip = null;
 try {

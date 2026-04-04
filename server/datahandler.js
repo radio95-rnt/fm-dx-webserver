@@ -1,5 +1,5 @@
 /* Libraries / Imports */
-const send_to_xrd = require('./xrd_server');
+const { send_xrd_online } = require('./xrd_server');
 const RDSDecoder = require("./rds.js");
 const { serverConfig } = require('./server_config');
 
@@ -274,7 +274,7 @@ checkSerialPortStatus();
 function showOnlineUsers(currentUsers) {
   dataToSend.users = currentUsers;
   initialData.users = currentUsers;
-  send_to_xrd(`o${currentUsers},0\n`);
+  send_xrd_online(currentUsers);
 }
 
 let prevFreq = initialData.freq || '87.500';

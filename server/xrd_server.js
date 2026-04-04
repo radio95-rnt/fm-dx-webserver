@@ -10,6 +10,10 @@ function send_to_xrd(data) {
     });
 }
 
+function send_xrd_online(fmusers) {
+  send_to_xrd(`o${currentUsers},${fmusers}\n`);
+}
+
 xrd.on('connection', (ws, request) => {
   const { initialData } = require('./datahandler');
   const { isAdminAuthenticated } = request.session || {};
@@ -37,4 +41,4 @@ xrd.on('connection', (ws, request) => {
 
 storage.websocket_delegation.set("/xrd", xrd);
 
-module.exports = send_to_xrd;
+module.exports = { send_to_xrd, send_xrd_online};
