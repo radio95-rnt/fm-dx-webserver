@@ -7,23 +7,7 @@ const dataHandler = require('./datahandler');
 const storage = require('./storage');
 const consoleCmd = require('./console');
 const { serverConfig, configSave } = require('./server_config');
-
-const WebSocket = require('ws');
-const rawComm = new WebSocket.Server({ noServer: true });
-
-rawComm.on('connection', (ws, request) => {
-  const { isAdminAuthenticated } = request.session || {};
-  if(!isAdminAuthenticated) {
-    ws.close(1008, "No admin");
-    return;
-  }
-
-  ws.on('message', (message) => {
-    storage.ctl_output.write(`${message.toString()}\n`);
-  });
-});
-
-storage.websocket_delegation.set("/rawcomm", rawComm);
+const send_to_rawcomm = require("./rawcomm")
 
 let geoip = null;
 try {
@@ -292,9 +276,7 @@ function resolveDataBuffer(data, wss, rdsWss) {
 
   if (receivedData.length) {
     dataHandler.handleData(wss, receivedData, rdsWss);
-    rawComm.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) client.send(receivedData);
-    });
+    send_to_rawcomm(receivedData);
   }
 }
 

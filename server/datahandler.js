@@ -1,4 +1,5 @@
 /* Libraries / Imports */
+const send_to_rawcomm = require('./rawcomm');
 const RDSDecoder = require("./rds.js");
 const { serverConfig } = require('./server_config');
 
@@ -273,6 +274,7 @@ checkSerialPortStatus();
 function showOnlineUsers(currentUsers) {
   dataToSend.users = currentUsers;
   initialData.users = currentUsers;
+  send_to_rawcomm(`o${currentUsers},0\n`);
 }
 
 let prevFreq = initialData.freq || '87.500';
