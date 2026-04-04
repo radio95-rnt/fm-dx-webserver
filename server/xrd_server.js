@@ -23,7 +23,7 @@ xrd.on('connection', (ws, request) => {
   }
 
   currentUsers++;
-  send_to_xrd(`o${currentUsers},${initialData.users}\n`);
+  send_xrd_online(initialData.users);
   ws.send(`T${initialData.freq * 1000}\n`);
   ws.send(`G${initialData.eq}${initialData.ims}\n`);
   ws.send(`Z${initialData.ant}\n`);
@@ -35,10 +35,10 @@ xrd.on('connection', (ws, request) => {
   ws.on('message', (message) => storage.ctl_output.write(`${message}\n`));
   ws.on('close', (code, reason) => {
     currentUsers--;
-    send_to_xrd(`o${currentUsers},${initialData.users}\n`);
+    send_xrd_online(initialData.users);
   });
 });
 
 storage.websocket_delegation.set("/xrd", xrd);
 
-module.exports = { send_to_xrd, send_xrd_online};
+module.exports = { send_to_xrd, send_xrd_online };
