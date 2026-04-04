@@ -1,5 +1,5 @@
 /* Libraries / Imports */
-const send_to_rawcomm = require('./rawcomm');
+const send_to_xrd = require('./xrd_server');
 const RDSDecoder = require("./rds.js");
 const { serverConfig } = require('./server_config');
 
@@ -33,7 +33,7 @@ var dataToSend = {
   ant: 0,
   txInfo: {
     tx: '', // Name
-    pol: '', // Polarisation
+    pol: '', // Polarization
     erp: '', // Power
     city: '',
     itu: '', // Country
@@ -274,7 +274,7 @@ checkSerialPortStatus();
 function showOnlineUsers(currentUsers) {
   dataToSend.users = currentUsers;
   initialData.users = currentUsers;
-  send_to_rawcomm(`o${currentUsers},0\n`);
+  send_to_xrd(`o${currentUsers},0\n`);
 }
 
 let prevFreq = initialData.freq || '87.500';
