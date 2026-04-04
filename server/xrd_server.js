@@ -2,6 +2,14 @@ const storage = require('./storage');
 const WebSocket = require('ws');
 const xrd = new WebSocket.Server({ noServer: true });
 
+let currentUsers = 0;
+
+function send_to_xrd(data) {
+    xrd.clients.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) client.send(data);
+    });
+}
+
 xrd.on('connection', (ws, request) => {
   const { initialData } = require('./datahandler');
   const { isAdminAuthenticated } = request.session || {};
@@ -10,7 +18,8 @@ xrd.on('connection', (ws, request) => {
     return;
   }
 
-  ws.send(`o${initialData.users},0\n`);
+  currentUsers++;
+  send_to_xrd(`o${currentUsers},${initialData.users}\n`);
   ws.send(`T${initialData.freq * 1000}\n`);
   ws.send(`G${initialData.eq}${initialData.ims}\n`);
   ws.send(`Z${initialData.ant}\n`);
@@ -20,14 +29,12 @@ xrd.on('connection', (ws, request) => {
   ws.send(`OK\n`);
 
   ws.on('message', (message) => storage.ctl_output.write(`${message}\n`));
+  ws.on('close', (code, reason) => {
+    currentUsers--;
+    send_to_xrd(`o${currentUsers},${initialData.users}\n`);
+  });
 });
 
 storage.websocket_delegation.set("/xrd", xrd);
-
-function send_to_xrd(data) {
-    xrd.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) client.send(data);
-    });
-}
 
 module.exports = send_to_xrd;
