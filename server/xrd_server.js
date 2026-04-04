@@ -32,7 +32,7 @@ xrd.on('connection', (ws, request) => {
   ws.send(`W${initialData.bw}\n`);
   ws.send(`OK\n`);
 
-  ws.on('message', (message) => storage.ctl_output.write(line));
+  ws.on('message', (message) => storage.ctl_output.write(message));
   ws.on('close', (code, reason) => {
     currentUsers--;
     send_xrd_online(initialData.users);
