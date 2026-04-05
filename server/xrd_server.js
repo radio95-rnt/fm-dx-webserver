@@ -81,6 +81,8 @@ xrd.on('connection', async (ws, request) => {
   ws.on('close', () => {
     currentUsers--;
     send_xrd_online(initialData.users);
+
+    clients = clients.filter(client => client !== ws);
   });
 });
 
