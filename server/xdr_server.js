@@ -78,9 +78,11 @@ xdr.on('connection', async (ws, request) => {
       switch(data.trim()) {
         case "wL1":
           serverConfig.lockToAdmin = true;
+          send_to_xdr("wL1\n")
           break;
         case "wL0":
           serverConfig.lockToAdmin = false;
+          send_to_xdr("wL0\n")
           break;
         // TODO: Do the wT, but not rn because i don't feel like doing the tunerlockTracker
       }
