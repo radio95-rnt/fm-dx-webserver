@@ -93,12 +93,9 @@ var _3LAS = /** @class */ (function () {
         if (this.WakeLock)
             this.WakeLock.Begin();
         try {
-            if (window.location.protocol === 'https:') { 
-                this.WebSocket = new WebSocketClient(this.Logger, 'wss://' + this.Settings.SocketHost + ':' + this.Settings.SocketPort.toString() + window.location.pathname + 'audio' , this.OnSocketError.bind(this), this.OnSocketConnect.bind(this), this.OnSocketDataReady.bind(this), this.OnSocketDisconnect.bind(this));
-            }
-            else {
-                this.WebSocket = new WebSocketClient(this.Logger, 'ws://' + this.Settings.SocketHost + ':' + this.Settings.SocketPort.toString() + window.location.pathname + 'audio' , this.OnSocketError.bind(this), this.OnSocketConnect.bind(this), this.OnSocketDataReady.bind(this), this.OnSocketDisconnect.bind(this));
-            }
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const url = `${wsProtocol}//${location.hostname}/audio`;
+            this.WebSocket = new WebSocketClient(this.Logger, url , this.OnSocketError.bind(this), this.OnSocketConnect.bind(this), this.OnSocketDataReady.bind(this), this.OnSocketDisconnect.bind(this));
             this.Logger.Log("Init of WebSocketClient succeeded");
             this.Logger.Log("Trying to connect to server.");
         }
