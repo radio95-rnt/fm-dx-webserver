@@ -1,13 +1,14 @@
 const WebSocket = require('ws');
-const { serverConfig } = require('./server_config');
+const { serverConfig, configExists } = require('./server_config');
 const { logChat } = require('./console');
 const helpers = require('./helpers');
+const storage = require('./storage.js');
 
 function heartbeat() { // WebSocket heartbeat helper
     this.isAlive = true;
 }
 
-function createChatServer(storage) {
+function createChatServer() {
     if (!serverConfig.webserver.chatEnabled) return;
 
     const chatWss = new WebSocket.Server({ noServer: true });
@@ -119,4 +120,5 @@ function createChatServer(storage) {
     storage.websocket_delegation.set("/chat", chatWss);
 }
 
-module.exports = { createChatServer };
+if(!configExists()) return;
+createChatServer();

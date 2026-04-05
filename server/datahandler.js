@@ -90,7 +90,7 @@ function handleData(wss, receivedData, rdsWss) {
 
   let modifiedData, parsedValue;
   const receivedLines = receivedData.split('\n');
-  
+
   for (const receivedLine of receivedLines) {
     switch (true) {
       case receivedLine.startsWith('F'): // Bandwidth

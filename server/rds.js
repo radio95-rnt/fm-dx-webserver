@@ -236,7 +236,7 @@ class RDSDecoder {
         if(d_error > 2) return; // Don't risk it
 
         const idx = blockB & 0x3;
-        
+
         const last_err = this.ps_errors[idx * 2];
         const cur_err = Math.ceil(d_error * (10/3)); // They expect an error score of 0-10 with 10 being the worst. Too bad we don't have that resolution
         const character_a = decode_charset(blockD >> 8);

@@ -1,5 +1,7 @@
+const { serverConfig, configExists } = require('./server_config');
+if(!configExists()) return;
+
 const fetch = require('node-fetch');
-const { serverConfig } = require('./server_config');
 const consoleCmd = require('./console');
 
 let localDb = {};
@@ -154,10 +156,10 @@ function validPsCompare(rdsPs, stationPs) {
 
     // Standardize the rdsPs string: replace spaces with underscores and convert to lowercase.
     const standardizedRdsPs = rdsPs.replace(/ /g, '_').toLowerCase();
-    
+
     // Split stationPs into tokens (e.g., "__mdr___ _kultur_" -> ["__mdr___", "_kultur_"])
     const psTokens = stationPs.split(/\s+/).filter(token => token.length > 0).map(token => { const lower = token.toLowerCase(); return lower.length < 8 ? lower.padEnd(8, '_') : lower; });
-       
+
     // Iterate through all tokens and check if any token yields at least three valid (non "_" ) matches.
     for (let token of psTokens) {
         // If total non "_" length of token is less than 3, allow match based on that length instead
@@ -165,7 +167,7 @@ function validPsCompare(rdsPs, stationPs) {
         const minMatchLen = tokenLength > 2 ? 3 : tokenLength;
         // If the token's length does not match the standardized rdsPs length, skip this token.
         if (token.length !== standardizedRdsPs.length) continue;
-        
+
         let matchCount = 0;
         for (let i = 0; i < standardizedRdsPs.length; i++) {
             // Skip this position if the character in standardizedRdsPs is an underscore.
@@ -234,7 +236,7 @@ async function fetchTx(freq, piCode, rdsPs) {
     if (filteredLocations.length > 1) {
         const extraFilteredLocations = filteredLocations.map(locData => ({
             ...locData,
-            stations: locData.stations.filter(station => 
+            stations: locData.stations.filter(station =>
                 station.ps?.toLowerCase().includes(
                     rdsPs.replace(/ /g, '_').toLowerCase()
                 ) ?? false
@@ -243,7 +245,7 @@ async function fetchTx(freq, piCode, rdsPs) {
 
         if (extraFilteredLocations.length > 0) filteredLocations = extraFilteredLocations;
     }
-  
+
     for (let loc of filteredLocations) {
       loc = Object.assign(loc, loc.stations[0]);
       delete loc.stations;
@@ -251,7 +253,7 @@ async function fetchTx(freq, piCode, rdsPs) {
       loc = Object.assign(loc, dist);
       loc.detectedByPireg = (loc.pireg === piCode.toUpperCase());
     }
-  
+
     if (filteredLocations.length > 1) {
         // Check for any 10kW+ stations within 700km, and don't Es weight if any found.
         const tropoPriority = filteredLocations.some(loc => loc.distanceKm < 700 && loc.erp >= 10);

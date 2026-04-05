@@ -38,7 +38,7 @@ function parsePluginConfig(filePath) {
                     if (fs.existsSync(destinationFile)) fs.unlinkSync(destinationFile); // Remove existing file/symlink
                     fs.symlinkSync(sourcePath, destinationFile);
                     setTimeout(function() {
-                        consoleCmd.logInfo(`Plugin ${pluginConfig.name} ${pluginConfig.version} initialized successfully.`);  
+                        consoleCmd.logInfo(`Plugin ${pluginConfig.name} ${pluginConfig.version} initialized successfully.`);
                     }, 500)
                 } catch (err) {
                     console.error(`Error creating symlink at ${destinationFile}: ${err.message}`);

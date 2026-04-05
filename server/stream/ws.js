@@ -11,9 +11,7 @@ audio_pipe.on('data', (chunk) => {
 });
 
 audio_pipe.on('end', () => {
-    audioWss.clients.forEach((client) => {
-        client.close(1001, "Audio stream ended");
-    });
+    audioWss.clients.forEach((client) => client.close(1001, "Audio stream ended"));
 });
 
 storage.websocket_delegation.set("/audio", audioWss);

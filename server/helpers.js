@@ -230,7 +230,7 @@ function processConnection(clientIp, locationInfo, currentUsers, ws, callback) {
             .join(', ')
         : 'Unknown';
     const userLocationForLog = locationInfo?.isp ? `${userLocation} (${locationInfo.isp})` : userLocation;
-  
+
     storage.connectedUsers.push({
       ip: clientIp,
       location: userLocation,

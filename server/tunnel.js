@@ -20,7 +20,7 @@ async function download() {
     if (!await fileExists(frpcPath)) {
       logInfo('frpc binary, required for tunnel is not available. Downloading now...');
       const frpcFileName = `frpc_${os.platform}_${os.arch}` + (os.platform() === 'win32' ? '.exe' : '');
-      
+
       try {
         const res = await fetch('https://fmtuner.org/binaries/' + frpcFileName);
         if (res.status === 404) throw new Error('404 error');
@@ -40,7 +40,7 @@ async function connect() {
   if (serverConfig.tunnel?.enabled === true) {
     const librariesDir = path.resolve(__dirname, '../libraries');
     const frpcPath = path.resolve(librariesDir, 'frpc' + (os.platform() === 'win32' ? '.exe' : ''));
-    
+
     const cfg = ejs.render(frpcConfigTemplate, {
       cfg: serverConfig.tunnel,
       host: serverConfig.tunnel.community.enabled ? serverConfig.tunnel.community.host : ((serverConfig.tunnel.region == "pldx") ? "pldx.duckdns.org" : (serverConfig.tunnel.region + ".fmtuner.org")),
@@ -67,11 +67,11 @@ async function connect() {
       else if (line.includes('login to server success')) logInfo('Connection to tunnel server was successful');
       else logDebug('Tunnel log:', line);
     });
-  
+
     child.on('error', (err) => {
       logError('Failed to start tunnel process:', err);
     });
-  
+
     child.on('close', (code) => {
       logInfo(`Tunnel process exited with code ${code}`);
     });

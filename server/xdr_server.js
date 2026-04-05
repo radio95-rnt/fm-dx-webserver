@@ -66,11 +66,25 @@ xdr.on('connection', async (ws, request) => {
   ws.send(`A${initialData.agc}\n`);
   ws.send(`F${initialData.bw}\n`);
   ws.send(`W${initialData.bw}\n`);
-  ws.send(`OK\n`);
+  ws.send(`wL${serverConfig.lockToAdmin ? "1" : "0"}\n`); // Don't know how XDR-GTK will handle this, but lets hope it will be fine
+  ws.send(`wT${serverConfig.publicTuner ? "1" : "0"}\n`); // Again
+  ws.send(`OK\n`); // Make sure dumbass clients don't need to wait long for the OK, does the comms really REQUIRE you to start the receiver for you to know you are in?
   clients.push(ws);
 
   ws.on('message', (message) => {
     const data = message.toString();
+
+    if(data.startsWith("w")) {
+      switch(data.trim()) {
+        case "wL1":
+          serverConfig.lockToAdmin = true;
+          break;
+        case "wL0":
+          serverConfig.lockToAdmin = false;
+          break;
+        // TODO: Do the wT, but not rn because i don't feel like doing the tunerlockTracker
+      }
+    }
 
     if (!storage.ctl_output.write(data)) {
       ws.pause();

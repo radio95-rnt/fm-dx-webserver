@@ -1,8 +1,13 @@
+const { PassThrough } = require('stream');
+const audio_pipe = new PassThrough();
+module.exports = audio_pipe; // Important
+
+const { serverConfig, configExists } = require('../server_config');
+if (!configExists()) return;
+
 const { spawn } = require('child_process');
-const { serverConfig } = require('../server_config');
 const { logDebug, logError, logInfo, logWarn, logFfmpeg } = require('../console');
 const checkFFmpeg = require('./checkFFmpeg');
-const { PassThrough } = require('stream');
 
 const consoleLogTitle = '[Audio Stream]';
 
@@ -15,7 +20,6 @@ function connectMessage(message) {
     }
 }
 
-const audio_pipe = new PassThrough();
 
 checkFFmpeg().then((ffmpegPath) => {
     logInfo(`${consoleLogTitle} Using ${ffmpegPath === 'ffmpeg' ? 'system-installed FFmpeg' : 'ffmpeg-static'}`);
@@ -138,5 +142,3 @@ checkFFmpeg().then((ffmpegPath) => {
 }).catch((err) => {
     logError(`${consoleLogTitle} Error: ${err.message}`);
 });
-
-module.exports = audio_pipe;

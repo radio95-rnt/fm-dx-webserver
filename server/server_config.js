@@ -153,7 +153,7 @@ function configUpdate(newConfig) {
     serverConfig.plugins = newConfig.plugins;
     delete newConfig.webserver.banlist;
   }
-  
+
   deepMerge(serverConfig, newConfig); // Overwrite with newConfig values
   configSave();
 }
