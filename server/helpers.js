@@ -7,7 +7,7 @@ const dataHandler = require('./datahandler');
 const storage = require('./storage');
 const consoleCmd = require('./console');
 const { serverConfig, configSave } = require('./server_config');
-const { send_to_xrd } = require("./xrd_server")
+const { send_to_xdr } = require("./xdr_server")
 
 let geoip = null;
 try {
@@ -276,7 +276,7 @@ function resolveDataBuffer(data, wss, rdsWss) {
 
   if (receivedData.length) {
     dataHandler.handleData(wss, receivedData, rdsWss);
-    send_to_xrd(receivedData);
+    send_to_xdr(receivedData);
   }
 }
 

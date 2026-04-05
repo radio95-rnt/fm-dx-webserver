@@ -1,20 +1,20 @@
 const storage = require('./storage');
 const WebSocket = require('ws');
 const crypto = require('crypto');
-const xrd = new WebSocket.Server({ noServer: true });
+const xdr = new WebSocket.Server({ noServer: true });
 const { serverConfig } = require('./server_config');
 
 let currentUsers = 0;
 let clients = []
 
-function send_to_xrd(data) {
+function send_to_xdr(data) {
     clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) client.send(data);
     });
 }
 
-function send_xrd_online(fmusers) {
-  send_to_xrd(`o${currentUsers},${fmusers}\n`);
+function send_xdr_online(fmusers) {
+  send_to_xdr(`o${currentUsers},${fmusers}\n`);
 }
 
 function randomString(length) {
@@ -26,7 +26,7 @@ function randomString(length) {
   return result;
 }
 
-function xrd_auth(ws, salt) {
+function xdr_auth(ws, salt) {
   return new Promise((resolve, reject) => {
     const expected = crypto.createHash('sha1')
       .update(salt + serverConfig.password.adminPass).digest('hex');
@@ -44,14 +44,14 @@ function xrd_auth(ws, salt) {
   });
 }
 
-xrd.on('connection', async (ws, request) => {
+xdr.on('connection', async (ws, request) => {
   const { initialData } = require('./datahandler');
 
   const salt = randomString(16);
   ws.send(`${salt}\n`);
 
   try {
-    await xrd_auth(ws, salt);
+    await xdr_auth(ws, salt);
   } catch (err) {
     ws.send("a0\n");
     ws.close(1008, err.message);
@@ -59,7 +59,7 @@ xrd.on('connection', async (ws, request) => {
   }
 
   currentUsers++;
-  send_xrd_online(initialData.users);
+  send_xdr_online(initialData.users);
   ws.send(`T${initialData.freq * 1000}\n`);
   ws.send(`G${initialData.eq}${initialData.ims}\n`);
   ws.send(`Z${initialData.ant}\n`);
@@ -80,12 +80,12 @@ xrd.on('connection', async (ws, request) => {
 
   ws.on('close', () => {
     currentUsers--;
-    send_xrd_online(initialData.users);
+    send_xdr_online(initialData.users);
 
     clients = clients.filter(client => client !== ws);
   });
 });
 
-storage.websocket_delegation.set("/xrd", xrd);
+storage.websocket_delegation.set("/xdr", xdr);
 
-module.exports = { send_to_xrd, send_xrd_online };
+module.exports = { send_to_xdr, send_xdr_online };

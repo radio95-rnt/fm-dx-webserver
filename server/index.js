@@ -117,7 +117,7 @@ function connectToSerial() {
     pluginsApi.setOutput(serialport);
     setTimeout(() => {
         serialport.write('x\n');
-    }, 2500);
+    }, 1000);
 
     setTimeout(() => {
       serialport.write('Q0\n');
@@ -456,7 +456,7 @@ wss.on('connection', (ws, request) => {
           }, 10000);
       }
 
-      if (currentUsers === 0 && serverConfig.autoShutdown === true && serverConfig.xdrd.wirelessConnection === true) client.write('X\n');
+      if (currentUsers === 0 && serverConfig.autoShutdown === true && serverConfig.xdrd.wirelessConnection) client.write('X\n');
 
       if (code !== 1008) logInfo(`Web client \x1b[31mdisconnected\x1b[0m (${clientIp}) \x1b[90m[${currentUsers}]`);
     });
