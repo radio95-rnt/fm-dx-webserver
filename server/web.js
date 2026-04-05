@@ -311,4 +311,4 @@ const startServer = (address) => {
   });
 };
 
-module.exports = { startServer, wss };
+module.exports = { startServer, wss, rdsWss };

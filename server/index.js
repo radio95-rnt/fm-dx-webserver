@@ -5,7 +5,7 @@ const dataHandler = require('./datahandler');
 const { logError, logInfo, logWarn } = require('./console');
 const { serverConfig, configExists } = require('./server_config');
 const pluginsApi = require('./plugins_api');
-const { startServer, wss } = require("./web");
+const { startServer, wss, rdsWss } = require("./web");
 
 const client = new (require('net')).Socket();
 
