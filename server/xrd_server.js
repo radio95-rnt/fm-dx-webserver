@@ -67,7 +67,7 @@ xrd.on('connection', async (ws, request) => {
   ws.send(`F${initialData.bw}\n`);
   ws.send(`W${initialData.bw}\n`);
   ws.send(`OK\n`);
-  clients.concat(ws);
+  clients.push(ws);
 
   ws.on('message', (message) => {
     const data = message.toString();
