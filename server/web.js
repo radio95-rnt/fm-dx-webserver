@@ -311,4 +311,4 @@ const startServer = (address) => {
   });
 };
 
-module.exports = startServer;
+module.exports = { startServer, wss };

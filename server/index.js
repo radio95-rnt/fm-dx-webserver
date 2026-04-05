@@ -5,6 +5,7 @@ const dataHandler = require('./datahandler');
 const { logError, logInfo, logWarn } = require('./console');
 const { serverConfig, configExists } = require('./server_config');
 const pluginsApi = require('./plugins_api');
+const { startServer, wss } = require("./web");
 
 const client = new (require('net')).Socket();
 
@@ -228,6 +229,6 @@ client.on('error', (err) => {
 });
 
 require('./stream/index');
-require("./web")(serverConfig.webserver.webserverIp === '0.0.0.0' ? 'localhost' : serverConfig.webserver.webserverIp);
+startServer(serverConfig.webserver.webserverIp === '0.0.0.0' ? 'localhost' : serverConfig.webserver.webserverIp);
 tunnel.connect();
 require('./fmdx_list').update();
