@@ -8,6 +8,7 @@ const pluginsApi = require('./plugins_api');
 const { logError, logInfo, logWarn } = require('./console');
 const { send_to_xdr } = require("./xdr_server")
 const helpers = require('./helpers');
+const dataHandler = require('./datahandler');
 
 const express = require('express');
 const session = require('express-session');
