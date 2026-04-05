@@ -9,6 +9,10 @@ class WebSocketAudioPlayer {
     this.started = false;
   }
 
+  supported() {
+    return MediaSource.isTypeSupported("audio/mpeg")
+  }
+
   _syncToLive() {
     if (!this.audio || !this.sourceBuffer) return;
     const buffered = this.sourceBuffer.buffered;
@@ -17,10 +21,10 @@ class WebSocketAudioPlayer {
     const liveEdge = buffered.end(buffered.length - 1);
     const lag = liveEdge - this.audio.currentTime;
 
-    if (lag > .3) this.audio.currentTime = liveEdge - 0.1;  // snap to near live edge
+    if (lag > .9) this.audio.currentTime = liveEdge - 0.15;  // snap to near live edge
   }
 
-  start() {
+  Start() {
     this.audio = new Audio();
     this.mediaSource = new MediaSource();
     this.audio.src = URL.createObjectURL(this.mediaSource);
@@ -48,7 +52,7 @@ class WebSocketAudioPlayer {
     });
   }
 
-  stop() {
+  Stop() { // capital to match 3las
     this.ws?.close();
     this.audio?.pause();
     this.queue = [];
@@ -68,6 +72,7 @@ class WebSocketAudioPlayer {
 
 let Stream = null;
 let shouldReconnect = true;
+let firefox = false;
 
 function Init(_ev) {
     $(".playbutton").off('click').on('click', OnPlayButtonClick);
@@ -75,18 +80,30 @@ function Init(_ev) {
 }
 
 function createStream() {
-    try {
-        const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-        Stream = new WebSocketAudioPlayer(`${wsProtocol}//${location.hostname}/audio`);
-        Stream.setVolume($('#volumeSlider').val());
-    } catch (error) {
-        console.error("Initialization Error: ", error);
+  try {
+    const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const url = `${wsProtocol}//${location.hostname}/audio`;
+
+    if (MediaSource.isTypeSupported("audio/mpeg")) {
+      firefox = false;
+      Stream = new WebSocketAudioPlayer(url);
+      Stream.setVolume($('#volumeSlider').val());
+    } else {
+      firefox = true;
+      const settings = new _3LAS_Settings();
+      Stream = new _3LAS(null, settings);
+      Stream.Volume = $('#volumeSlider').val();
+      Stream.ConnectivityCallback = OnConnectivityCallback;
     }
+
+  } catch (error) {
+    console.error("Initialization Error: ", error);
+  }
 }
 
 function destroyStream() {
     if (Stream) {
-        Stream.stop();
+        Stream.Stop();
         Stream = null;
     }
 }
@@ -105,20 +122,29 @@ function OnPlayButtonClick(_ev) {
         console.log("Starting stream...");
         shouldReconnect = true;
         createStream();
-        Stream.start();
+        Stream.Start();
         $playbutton.find('.fa-solid')?.toggleClass('fa-play fa-stop');
         if (isAppleiOS && 'audioSession' in navigator) navigator.audioSession.type = "playback";
     }
 
     $playbutton.addClass('bg-gray').prop('disabled', true);
     setTimeout(() => $playbutton.removeClass('bg-gray').prop('disabled', false), 2000);
-    if (Stream) Stream.setVolume($("#volumeSlider").val());
+    if (Stream && firefox) Stream.setVolume($("#volumeSlider").val());
 }
 
 function updateVolume() {
+  if(firefox) {
     const newVolume = $(this).val();
     if (Stream) Stream.setVolume(newVolume);
     else console.warn("Stream is not initialized.");
+  } else {
+    if(Stream) {
+      const newVolume = $(this).val();
+      newVolumeGlobal = newVolume;
+      console.log("Volume updated to:", newVolume);
+      Stream.Volume = newVolume;
+    } else console.warn("Stream is not initialized.");
+  }
 }
 
 $(document).ready(Init);

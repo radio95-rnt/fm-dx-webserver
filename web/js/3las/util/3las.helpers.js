@@ -2,9 +2,6 @@
     Helpers is part of 3LAS (Low Latency Live Audio Streaming)
     https://github.com/JoJoBond/3LAS
 */
-
-// Terrible
-
 var isAndroid;
 var isIOS;
 var isIPadOS;
@@ -14,12 +11,18 @@ var isBSD;
 var isMacOSX;
 var isInternetExplorer;
 var isEdge;
+;
 var isSafari;
+;
 var isOpera;
+;
 var isChrome;
+;
 var isFirefox;
+;
 var webkitVer;
 var isNativeChrome;
+;
 var BrowserName;
 var OSName;
 {
@@ -40,23 +43,39 @@ var OSName;
     webkitVer = parseInt((/WebKit\/([0-9]+)/.exec(navigator.appVersion) || ["", "0"])[1], 10) || void 0; // also match AppleWebKit
     isNativeChrome = isAndroid && webkitVer <= 537 && navigator.vendor.toLowerCase().indexOf('google') == 0;
     BrowserName = "Unknown";
-    if (isInternetExplorer) BrowserName = "IE";
-    else if (isEdge) BrowserName = "Edge";
-    else if (isSafari) BrowserName = "Safari";
-    else if (isOpera) BrowserName = "Opera";
-    else if (isChrome) BrowserName = "Chrome";
-    else if (isFirefox) BrowserName = "Firefox";
-    else if (isNativeChrome) BrowserName = "NativeChrome";
-    else BrowserName = "Unknown";
+    if (isInternetExplorer)
+        BrowserName = "IE";
+    else if (isEdge)
+        BrowserName = "Edge";
+    else if (isSafari)
+        BrowserName = "Safari";
+    else if (isOpera)
+        BrowserName = "Opera";
+    else if (isChrome)
+        BrowserName = "Chrome";
+    else if (isFirefox)
+        BrowserName = "Firefox";
+    else if (isNativeChrome)
+        BrowserName = "NativeChrome";
+    else
+        BrowserName = "Unknown";
     OSName = "Unknown";
-    if (isAndroid) OSName = "Android";
-    else if (isIOS) OSName = "iOS";
-    else if (isIPadOS) OSName = "iPadOS";
-    else if (isWindows) OSName = "Windows";
-    else if (isLinux) OSName = "Linux";
-    else if (isBSD) OSName = "BSD";
-    else if (isMacOSX) OSName = "MacOSX";
-    else OSName = "Unknown";
+    if (isAndroid)
+        OSName = "Android";
+    else if (isIOS)
+        OSName = "iOS";
+    else if (isIPadOS)
+        OSName = "iPadOS";
+    else if (isWindows)
+        OSName = "Windows";
+    else if (isLinux)
+        OSName = "Linux";
+    else if (isBSD)
+        OSName = "BSD";
+    else if (isMacOSX)
+        OSName = "MacOSX";
+    else
+        OSName = "Unknown";
 }
 ;
 var WakeLock = /** @class */ (function () {
@@ -72,7 +91,8 @@ var WakeLock = /** @class */ (function () {
             WakeLock.AddSourceToVideo(video, 'mp4', 'data:video/mp4;base64,' + WakeLock.VideoMp4);
             document.body.appendChild(video);
             this.LockElement = video;
-        } else {
+        }
+        else {
             this.Logger.Log("Using WakeLock API.");
             this.LockElement = null;
         }
@@ -89,7 +109,8 @@ var WakeLock = /** @class */ (function () {
                     _this.Logger.Log("WakeLock request failed.");
                     console.log("WakeLock request failed.");
                 });
-            } catch (err) {
+            }
+            catch (err) {
                 this.Logger.Log("WakeLock request failed.");
                 console.log("WakeLock request failed.");
             }
@@ -102,7 +123,9 @@ var WakeLock = /** @class */ (function () {
                 _this.LockElement.play().catch(err => {
                     console.error("LockElement failed:", err);
                 });
-            } else console.warn("LockElement not a media element or already assigned.");
+            } else {
+                console.warn("LockElement not a media element or already assigned.");
+            }
         }
     };
     WakeLock.AddSourceToVideo = function (element, type, dataURI) {
