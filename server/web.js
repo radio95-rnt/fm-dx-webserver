@@ -54,7 +54,7 @@ let currentUsers = 0;
 let timeoutAntenna;
 
 wss.on('connection', (ws, request) => {
-    const output = serverConfig.xdrd.wirelessConnection ? client : serialport;
+    const output = storage.ctl_output;
     let clientIp = helpers.getIpAddress(request);
     const userCommandHistory = {};
 
@@ -100,7 +100,7 @@ wss.on('connection', (ws, request) => {
       }
       dataHandler.showOnlineUsers(currentUsers);
 
-      if (currentUsers === 1 && serverConfig.autoShutdown === true && serverConfig.xdrd.wirelessConnection) serverConfig.xdrd.wirelessConnection ? connectToXdrd() : serialport.write('x\n');
+      if (currentUsers === 1 && serverConfig.autoShutdown === true && serverConfig.xdrd.wirelessConnection) serverConfig.xdrd.wirelessConnection ? connectToXdrd() : storage.ctl_output.write('x\n');
     });
 
     const userCommands = {};
