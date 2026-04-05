@@ -90,6 +90,7 @@ function createStream() {
       Stream.setVolume($('#volumeSlider').val());
     } else {
       firefox = true;
+      alert("Your browser does not support MP3 over MSE, meaning we have to use 3LAS which is terrible and gives terrible audio quality. If you want better sound, switch to anything chromium based")
       const settings = new _3LAS_Settings();
       Stream = new _3LAS(null, settings);
       Stream.Volume = $('#volumeSlider').val();
