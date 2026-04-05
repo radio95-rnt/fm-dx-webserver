@@ -134,7 +134,7 @@ function OnPlayButtonClick(_ev) {
 }
 
 function updateVolume() {
-  if(firefox) {
+  if(!firefox) {
     const newVolume = $(this).val();
     if (Stream) Stream.setVolume(newVolume);
     else console.warn("Stream is not initialized.");
