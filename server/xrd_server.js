@@ -5,9 +5,10 @@ const xrd = new WebSocket.Server({ noServer: true });
 const { serverConfig } = require('./server_config');
 
 let currentUsers = 0;
+let clients = []
 
 function send_to_xrd(data) {
-    xrd.clients.forEach((client) => {
+    clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) client.send(data);
     });
 }
@@ -66,8 +67,9 @@ xrd.on('connection', async (ws, request) => {
   ws.send(`F${initialData.bw}\n`);
   ws.send(`W${initialData.bw}\n`);
   ws.send(`OK\n`);
+  clients.concat(ws);
 
-  ws.on('message', (message, isBinary) => {
+  ws.on('message', (message) => {
     const data = message.toString();
 
     if (!storage.ctl_output.write(data)) {
