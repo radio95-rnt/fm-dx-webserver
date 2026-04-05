@@ -34,9 +34,9 @@ function xrd_auth(ws, salt) {
       reject(new Error('Auth timeout'));
     }, 10_000);
 
-    ws.once('message', (message, isBinary) => {
+    ws.once('message', (message) => {
       clearTimeout(timeout);
-      const received = (isBinary ? message.toString() : message).trim();
+      const received = message.toString().trim();
       if (received === expected) resolve();
       else reject(new Error('Invalid credentials'));
     });
@@ -68,7 +68,7 @@ xrd.on('connection', async (ws, request) => {
   ws.send(`OK\n`);
 
   ws.on('message', (message, isBinary) => {
-    const data = isBinary ? message : message.toString();
+    const data = message.toString();
 
     if (!storage.ctl_output.write(data)) {
       ws.pause();
