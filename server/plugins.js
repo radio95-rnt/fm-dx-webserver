@@ -14,7 +14,13 @@ function parsePluginConfig(filePath) {
         const pluginExports = require(filePath);
         Object.assign(pluginConfig, pluginExports.pluginConfig);
 
-        // Check if pluginConfig has frontEndPath defined
+        if(pluginConfig.server_embedded) {
+            setTimeout(function() {
+                consoleCmd.logInfo(`Server plugin ${pluginConfig.name} ${pluginConfig.version} initialized successfully.`);
+            }, 500)
+            return pluginConfig;
+        }
+
         if (pluginConfig.frontEndPath) {
             const sourcePath = path.join(path.dirname(filePath), pluginConfig.frontEndPath);
             const destinationDir = path.join(__dirname, '../web/js/plugins', path.dirname(pluginConfig.frontEndPath));

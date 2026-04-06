@@ -3,6 +3,7 @@ if(!configExists()) return;
 
 const fetch = require('node-fetch');
 const consoleCmd = require('./console');
+const storage = require('./storage');
 
 let localDb = {};
 let nextLocalDbUpdate = 0;
@@ -217,7 +218,8 @@ async function fetchTx(freq, piCode, rdsPs) {
     if (serverConfig.webserver.rdsMode === true) await loadUsStatesGeoJson();
 
     const key = `${freq}|${piCode.toUpperCase()}`;
-    let rawMatches = piFreqIndex[key] || [];
+    var rawMatches = piFreqIndex[key] || [];
+    rawMatches = [...storage.tx_search_hook[key], ...rawMatches];
 
     // Format the results into the same structure as before
     let filteredLocations = rawMatches.map(({ station, ...locData }) => ({

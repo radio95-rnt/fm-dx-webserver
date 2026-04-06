@@ -14,7 +14,7 @@ require("./device");
 {
   const helpers = require('./helpers');
   const plugins = helpers.findServerFiles(serverConfig.plugins);
-  if (plugins.length > 0) setTimeout(helpers.startPluginsWithDelay, 4000, plugins, 3000);
+  if (plugins.length > 0) setTimeout(helpers.startPluginsWithDelay, 3000, plugins, 3000);
 }
 
 require('./stream/index');
