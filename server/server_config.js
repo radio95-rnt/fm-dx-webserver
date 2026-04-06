@@ -42,7 +42,7 @@ let serverConfig = {
     xdrdPassword: ""
   },
   audio: {
-    audioDevice: "Microphone (High Definition Audio Device)",
+    audioDevice: null,
     audioChannels: 2,
     audioBitrate: "128k",
     startupVolume: "1"

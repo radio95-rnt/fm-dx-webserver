@@ -66,9 +66,9 @@ xdr.on('connection', async (ws, request) => {
   ws.send(`A${initialData.agc}\n`);
   ws.send(`F${initialData.bw}\n`);
   ws.send(`W${initialData.bw}\n`);
-  ws.send(`wL${serverConfig.lockToAdmin ? "1" : "0"}\n`); // Don't know how XDR-GTK will handle this, but lets hope it will be fine
-  ws.send(`wT${serverConfig.publicTuner ? "0" : "1"}\n`); // Again
-  ws.send(`OK\n`); // Make sure dumbass clients don't need to wait long for the OK, does the comms really REQUIRE you to start the receiver for you to know you are in?
+  ws.send(`wL${serverConfig.lockToAdmin ? "1" : "0"}\n`);
+  ws.send(`wT${serverConfig.publicTuner ? "0" : "1"}\n`);
+  ws.send(`OK\n`); // Make sure dumbass clients don't need to wait long for the OK, does the protocol really REQUIRE you to start the receiver for you to know you are in?
   clients.push(ws);
 
   ws.on('message', (message) => {

@@ -24,10 +24,16 @@ const sessionMiddleware = session({
 });
 app.use(sessionMiddleware);
 app.use(bodyParser.json());
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '../views'));
+app.use('/', endpoints);
+app.use(express.static(path.join(__dirname, '../web')));
 
 const wss = new WebSocket.Server({ noServer: true });
 const rdsWss = new WebSocket.Server({ noServer: true });
 const pluginsWss = new WebSocket.Server({ noServer: true, perMessageDeflate: true });
+pluginsApi.registerServerContext({ wss, pluginsWss, httpServer, serverConfig });
+
 require('./chat');
 
 const tunerLockTracker = new WeakMap();
@@ -294,15 +300,7 @@ httpServer.on('upgrade', (request, socket, head) => {
   } else socket.destroy();
 });
 
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '../views'));
-app.use('/', endpoints);
-app.use(express.static(path.join(__dirname, '../web')));
-pluginsApi.registerServerContext({ wss, pluginsWss, httpServer, serverConfig });
-
-const logServerStart = (address) => {
-  logInfo(`Web server has started on address \x1b[34mhttp://${address}:${serverConfig.webserver.webserverPort}\x1b[0m.`);
-};
+const logServerStart = (address) => logInfo(`Web server has started on address \x1b[34mhttp://${address}:${serverConfig.webserver.webserverPort}\x1b[0m.`);
 
 const startServer = (address) => {
   httpServer.listen(serverConfig.webserver.webserverPort, address, () => {
@@ -313,4 +311,4 @@ const startServer = (address) => {
   });
 };
 
-module.exports = { startServer, wss, rdsWss };
+module.exports = startServer;

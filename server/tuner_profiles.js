@@ -19,8 +19,7 @@ const tunerProfiles = [
       { value: 254000, label: '254 kHz' },
       { value: 287000, label: '287 kHz' },
       { value: 311000, label: '311 kHz' }
-    ],
-    details: ''
+    ], details: ''
   },
   {
     id: 'xdr',
@@ -43,12 +42,11 @@ const tunerProfiles = [
       { value: 281000, value2: 13, label: '281 kHz' },
       { value: 298000, value2: 14, label: '298 kHz' },
       { value: 309000, value2: 15, label: '309 kHz' }
-    ],
-    details: ''
+    ], details: ''
   },
   {
     id: 'sdr',
-    label: 'SDR (RTL-SDR / AirSpy)',
+    label: 'SDR',
     fmBandwidths: [
       { value: 0, label: 'Auto' },
       { value: 4000, label: '4 kHz' },
@@ -64,20 +62,18 @@ const tunerProfiles = [
       { value: 175000, label: '175 kHz' },
       { value: 200000, label: '200 kHz' },
       { value: 225000, label: '225 kHz' }
-    ],
-    details: ''
+    ], details: ''
   },
   {
     id: 'si47xx',
-    label: 'Si47XX (Si4735 / Si4732)',
+    label: 'Si47xx (Si4735 / Si4732)',
     fmBandwidths: [
       { value: 0, label: 'Auto' },
       { value: 40000, label: '40 kHz' },
       { value: 60000, label: '60 kHz' },
       { value: 84000, label: '84 kHz' },
       { value: 110000, label: '110 kHz' }
-    ],
-    details: ''
+    ], details: ''
   }
 ];
 

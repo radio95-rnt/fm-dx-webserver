@@ -71,22 +71,17 @@ function collectPluginConfigs() {
 const webJsPluginsDir = path.join(__dirname, '../web/js/plugins');
 if (!fs.existsSync(webJsPluginsDir)) fs.mkdirSync(webJsPluginsDir, { recursive: true });
 
-// Main function to create symlinks/junctions for plugins
-function createLinks() {
-    if (process.platform === 'win32') {
-        const pluginsDir = path.join(__dirname, '../plugins');
-        const destinationPluginsDir = path.join(__dirname, '../web/js/plugins');
+if (process.platform === 'win32') {
+    const pluginsDir = path.join(__dirname, '../plugins');
+    const destinationPluginsDir = path.join(__dirname, '../web/js/plugins');
 
-        // On Windows, create a junction
-        try {
-            if (fs.existsSync(destinationPluginsDir)) fs.rmSync(destinationPluginsDir, { recursive: true });
-            fs.symlinkSync(pluginsDir, destinationPluginsDir, 'junction');
-        } catch (err) {
-            console.error(`Error creating junction at ${destinationPluginsDir}: ${err.message}`);
-        }
+    // On Windows, create a junction
+    try {
+        if (fs.existsSync(destinationPluginsDir)) fs.rmSync(destinationPluginsDir, { recursive: true });
+        fs.symlinkSync(pluginsDir, destinationPluginsDir, 'junction');
+    } catch (err) {
+        console.error(`Error creating junction at ${destinationPluginsDir}: ${err.message}`);
     }
 }
 
-// the usage example comment that was here got me so laughing, that i don't know about all of this
-createLinks();
 module.exports = collectPluginConfigs();

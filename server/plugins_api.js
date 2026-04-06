@@ -76,7 +76,6 @@ async function sendPrivilegedCommand(command, isPluginInternal = false) {
 
     if (isPluginInternal) {
         output.write(`${command}\n`);
-        //logInfo(`[Privileged Plugin] Command sent: ${command}`); // Debug
         return true;
     }
 

@@ -1,5 +1,5 @@
 /* Libraries / Imports */
-const { send_xdr_online } = require('./xdr_server');
+const { send_xdr_online, send_to_xdr } = require('./xdr_server');
 const RDSDecoder = require("./rds.js");
 const { serverConfig } = require('./server_config');
 
@@ -85,6 +85,8 @@ function rdsReset() {
 }
 
 function handleData(wss, receivedData, rdsWss) {
+  send_to_xdr(receivedData);
+  
   // Retrieve the last update time for this client
   const currentTime = Date.now();
 
@@ -117,9 +119,7 @@ function handleData(wss, receivedData, rdsWss) {
           dataToSend.pi = '?';
           dataToSend.txInfo.reg = false;
 
-          rdsWss.clients.forEach((client) => {
-            client.send("G:\r\nRESET-------\r\n\r\n");
-          });
+          rdsWss.clients.forEach((client) => client.send("G:\r\nRESET-------\r\n\r\n"));
         }
         break;
       case receivedLine.startsWith('Z'): // Antenna
@@ -228,9 +228,7 @@ function handleData(wss, receivedData, rdsWss) {
           };
       }
   })
-  .catch((error) => {
-      console.log("Error fetching Tx info:", error);
-  });
+  .catch((error) => console.log("Error fetching Tx info:", error));
 
   // Send the updated data to the client
   const dataToSendJSON = JSON.stringify(dataToSend);

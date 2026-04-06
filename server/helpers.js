@@ -7,7 +7,6 @@ const dataHandler = require('./datahandler');
 const storage = require('./storage');
 const consoleCmd = require('./console');
 const { serverConfig, configSave } = require('./server_config');
-const { send_to_xdr } = require("./xdr_server")
 
 let geoip = null;
 try {
@@ -139,9 +138,7 @@ function handleConnect(clientIp, currentUsers, ws, callback) {
         regionName: geo.region,
       };
     }
-  } else if (!geoip) {
-    consoleCmd.logWarn('geoip-lite is not installed; location will be Unknown.');
-  }
+  } else if (!geoip) consoleCmd.logWarn('geoip-lite is not installed; location will be Unknown.');
 
   const inFlightPromise = fetchIpWhoisInfo(clientIp)
     .then((whoisInfo) => {
@@ -166,12 +163,10 @@ function fetchBannedAS(callback) {
   const now = Date.now();
   if (bannedASCache.data && now - bannedASCache.timestamp < 10 * 60 * 1000) return callback(bannedASCache.data);
 
-  const req = https.get("https://fmdx.org/banned_as.json", { family: 4 }, (banResponse) => {
+  const req = https.get("https://flerken.zapto.org:5000/banned_as.json", { family: 4 }, (banResponse) => {
     let banData = "";
 
-    banResponse.on("data", (chunk) => {
-      banData += chunk;
-    });
+    banResponse.on("data", (chunk) => banData += chunk);
 
     banResponse.on("end", () => {
       try {
@@ -185,8 +180,8 @@ function fetchBannedAS(callback) {
     });
   });
 
-  // Set timeout for the request (5 seconds)
-  req.setTimeout(5000, () => {
+  // Set timeout for the request (3 seconds)
+  req.setTimeout(3000, () => {
     console.error("Error: Request timed out while fetching banned AS list.");
     req.abort();
     callback([]); // Default to allowing user
@@ -232,12 +227,9 @@ function processConnection(clientIp, locationInfo, currentUsers, ws, callback) {
     const userLocationForLog = locationInfo?.isp ? `${userLocation} (${locationInfo.isp})` : userLocation;
 
     storage.connectedUsers.push({
-      ip: clientIp,
-      location: userLocation,
-      isp: locationInfo?.isp,
-      as: locationInfo?.as,
-      time: connectionTime,
-      instance: ws,
+      ip: clientIp, location: userLocation,
+      isp: locationInfo?.isp, as: locationInfo?.as,
+      time: connectionTime, instance: ws,
     });
 
     consoleCmd.logInfo(`Web client \x1b[32mconnected\x1b[0m (${clientIp}) \x1b[90m[${currentUsers}]\x1b[0m Location: ${userLocationForLog}`);
@@ -259,7 +251,10 @@ function formatUptime(uptimeInSeconds) {
 
 let incompleteDataBuffer = '';
 
-function resolveDataBuffer(data, wss, rdsWss) {
+function resolveDataBuffer(data) {
+  const wss = storage.websocket_delegation.get("/text"); // Genius
+  const rdsWss = storage.websocket_delegation.get("/rds");
+  
   var receivedData = incompleteDataBuffer + data.toString();
   const isIncomplete = (receivedData.slice(-1) != '\n');
 
@@ -274,10 +269,7 @@ function resolveDataBuffer(data, wss, rdsWss) {
     }
   } else incompleteDataBuffer = '';
 
-  if (receivedData.length) {
-    dataHandler.handleData(wss, receivedData, rdsWss);
-    send_to_xdr(receivedData);
-  }
+  if (receivedData.length) dataHandler.handleData(wss, receivedData, rdsWss);
 }
 
 function kickClient(ipAddress) {
@@ -311,12 +303,10 @@ function checkLatency(host, port = 80, timeout = 2000) {
 
     socket.on("timeout", () => {
       socket.destroy();
-      resolve(null);     // timed out
+      resolve(null);     // timed out (yeah thanks, didn't see that but that comment had changed how i look on the world)
     });
 
-    socket.on("error", () => {
-      resolve(null);     // offline
-    });
+    socket.on("error", () => resolve(null));
   });
 }
 

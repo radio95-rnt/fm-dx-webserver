@@ -3,7 +3,7 @@ const audio_pipe = new PassThrough();
 module.exports = audio_pipe; // Important
 
 const { serverConfig, configExists } = require('../server_config');
-if (!configExists()) return;
+if (!configExists() || !serverConfig.audio.audioDevice) return;
 
 const { spawn } = require('child_process');
 const { logDebug, logError, logInfo, logWarn, logFfmpeg } = require('../console');
@@ -19,7 +19,6 @@ function connectMessage(message) {
         startupSuccess = true;
     }
 }
-
 
 checkFFmpeg().then((ffmpegPath) => {
     logInfo(`${consoleLogTitle} Using ${ffmpegPath === 'ffmpeg' ? 'system-installed FFmpeg' : 'ffmpeg-static'}`);

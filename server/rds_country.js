@@ -218,7 +218,7 @@ var countries = [
     "Vietnam",
     "Kiribati",
     "North Korea",
-    "Brazil/Equator"
+    "Brazil/Equador"
 ]
 
 var iso = [
@@ -444,8 +444,6 @@ var iso = [
     "--"
 ]
 
-// RDS ECC Lookup Tables - Converted from C to JavaScript
-
 const rdsEccA0A6Lut = [
   // A0
   [
@@ -461,7 +459,7 @@ const rdsEccA0A6Lut = [
   ],
   // A2
   [
-    "Anguilla", "Antigua and Barbuda", "Brazil/Equator", "Falkland Islands", "Barbados",
+    "Anguilla", "Antigua and Barbuda", "Brazil/Equador", "Falkland Islands", "Barbados",
     "Belize", "Cayman Islands", "Costa Rica", "Cuba", "Argentina",
     "Brazil", "Brazil/Bermuda", "Brazil/AN", "Guadeloupe", "Bahamas"
   ],

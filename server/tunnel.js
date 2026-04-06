@@ -51,9 +51,7 @@ async function connect() {
     const cfgPath = path.resolve(librariesDir, 'frpc.toml');
     await fs.writeFile(cfgPath, cfg);
     const child = spawn(frpcPath, ['-c', cfgPath]);
-    process.on('exit', () => {
-      child.kill();
-    });
+    process.on('exit', () => child.kill());
 
     const rl = readline.createInterface({
       input: child.stdout,

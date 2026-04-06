@@ -5,7 +5,7 @@ const dataHandler = require('./datahandler');
 const { logError, logInfo, logWarn } = require('./console');
 const { serverConfig, configExists } = require('./server_config');
 const pluginsApi = require('./plugins_api');
-const { startServer, wss, rdsWss } = require("./web");
+const startServer = require("./web");
 
 const client = new (require('net')).Socket();
 
@@ -104,13 +104,8 @@ function connectToSerial() {
         : serialport.write('Y100\n');
     }, 6000);
 
-    serialport.on('data', (data) => {
-      helpers.resolveDataBuffer(data, wss, rdsWss);
-    });
-
-    serialport.on('error', (error) => {
-      logError(error.message);
-    });
+    serialport.on('data', (data) => helpers.resolveDataBuffer(data));
+    serialport.on('error', (error) => logError(error.message));
   });
 
   // Handle port closure
@@ -150,7 +145,7 @@ function connectToXdrd() {
 client.on('data', (data) => {
   const { xdrd } = serverConfig;
 
-  helpers.resolveDataBuffer(data, wss, rdsWss);
+  helpers.resolveDataBuffer(data);
   if (authFlags.authMsg == true && authFlags.messageCount > 1) return;
 
   authFlags.messageCount++;
