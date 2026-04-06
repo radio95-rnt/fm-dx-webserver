@@ -44,7 +44,7 @@ function xdr_auth(ws, salt) {
   });
 }
 
-xdr.on('connection', async (ws, request) => {
+xdr.on('connection', async (ws) => {
   const { initialData } = require('./datahandler');
 
   const salt = randomString(16);
@@ -79,12 +79,19 @@ xdr.on('connection', async (ws, request) => {
         case "wL1":
           serverConfig.lockToAdmin = true;
           send_to_xdr("wL1\n")
-          break;
+          return;
         case "wL0":
           serverConfig.lockToAdmin = false;
           send_to_xdr("wL0\n")
-          break;
-        // TODO: Do the wT, but not rn because i don't feel like doing the tunerlockTracker
+          return;
+        case "wT1":
+          serverConfig.publicTuner = false;
+          send_to_xdr("wT1\n")
+          return;
+        case "wT0":
+          serverConfig.publicTuner = true;
+          send_to_xdr("wT0\n")
+          return;
       }
     }
 

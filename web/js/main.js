@@ -815,8 +815,7 @@ function findOnMaps() {
 
     frequency > 74 ? frequency = frequency.toFixed(1) : null;
 
-    var url = `https://maps.fmdx.org/#qth=${longitude},${latitude}&freq=${frequency}&findPi=${pi}`;
-    window.open(url, "_blank");
+    window.open(`https://maps.fmdx.org/#qth=${longitude},${latitude}&freq=${frequency}&findPi=${pi}`, "_blank");
 }
 
 function updateSignalUnits(parsedData, averageSignal) {

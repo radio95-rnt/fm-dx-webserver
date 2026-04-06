@@ -7,10 +7,10 @@ const LOG_FILE = process.argv.includes('--config') && process.argv[process.argv.
   ? `serverlog_${process.argv[process.argv.indexOf('--config') + 1]}.txt`
   : 'serverlog.txt';
 const ANSI_ESCAPE_CODE_PATTERN = /\x1b\[[0-9;]*m/g;
-const MAX_LOG_LINES = 3500;
+const MAX_LOG_LINES = 2500;
 const FLUSH_INTERVAL = 60000;
 const logs = [];
-const maxConsoleLogLines = 250;
+const maxConsoleLogLines = 230;
 let logBuffer = [];
 
 // Message prefixes with ANSI codes
@@ -27,7 +27,7 @@ const MESSAGE_PREFIX = {
 const getCurrentTime = () => {
     const currentTime = new Date();
     const date = currentTime.toLocaleDateString().replace(/\ /g, '');
-    const time = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const time = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
     return `\x1b[90m[${date} ${time}]\x1b[0m`;
 };
 
@@ -57,6 +57,7 @@ function appendLogToBuffer(logMessage) {
     const cleanLogMessage = removeANSIEscapeCodes(logMessage);
     logBuffer.push(cleanLogMessage + '\n');
 }
+appendLogToBuffer("Server started.");
 
 async function flushLogBuffer() {
     if (logBuffer.length === 0) return;

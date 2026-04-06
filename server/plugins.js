@@ -3,8 +3,7 @@ const path = require('path');
 const consoleCmd = require('./console');
 
 function readJSFiles(dir) {
-    const files = fs.readdirSync(dir);
-    return files.filter(file => file.endsWith('.js'));
+    return fs.readdirSync(dir).filter(file => file.endsWith('.js'));
 }
 
 function parsePluginConfig(filePath) {
@@ -44,7 +43,7 @@ function parsePluginConfig(filePath) {
                     console.error(`Error creating symlink at ${destinationFile}: ${err.message}`);
                 }
             }
-        } else console.error(`Error: frontEndPath is not defined in ${filePath}`);
+        }
     } catch (err) {
         console.error(`Error parsing plugin config from ${filePath}: ${err.message}`);
     }
@@ -52,27 +51,13 @@ function parsePluginConfig(filePath) {
     return pluginConfig;
 }
 
-// Main function to collect plugin configs from all .js files in the 'plugins' directory
-function collectPluginConfigs() {
-    const pluginsDir = path.join(__dirname, '../plugins');
-    const jsFiles = readJSFiles(pluginsDir);
-
-    const pluginConfigs = [];
-    jsFiles.forEach(file => {
-        const filePath = path.join(pluginsDir, file);
-        const config = parsePluginConfig(filePath);
-        if (Object.keys(config).length > 0) pluginConfigs.push(config);
-    });
-
-    return pluginConfigs;
-}
-
 // Ensure the web/js/plugins directory exists
 const webJsPluginsDir = path.join(__dirname, '../web/js/plugins');
 if (!fs.existsSync(webJsPluginsDir)) fs.mkdirSync(webJsPluginsDir, { recursive: true });
 
+const pluginsDir = path.join(__dirname, '../plugins');
+
 if (process.platform === 'win32') {
-    const pluginsDir = path.join(__dirname, '../plugins');
     const destinationPluginsDir = path.join(__dirname, '../web/js/plugins');
 
     // On Windows, create a junction
@@ -84,4 +69,11 @@ if (process.platform === 'win32') {
     }
 }
 
-module.exports = collectPluginConfigs();
+const pluginConfigs = [];
+readJSFiles(pluginsDir).forEach(file => {
+    const filePath = path.join(pluginsDir, file);
+    const config = parsePluginConfig(filePath);
+    if (Object.keys(config).length > 0) pluginConfigs.push(config);
+});
+
+module.exports = pluginConfigs;

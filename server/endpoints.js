@@ -14,8 +14,7 @@ const storage = require('./storage');
 const tunerProfiles = require('./tuner_profiles');
 const { logInfo, logs } = require('./console');
 const dataHandler = require('./datahandler');
-const fmdxList = require('./fmdx_list');
-const allPluginConfigs = require('./plugins');
+const serverList = require('./server_list');
 
 // Endpoints
 router.get('/', (req, res) => {
@@ -141,8 +140,7 @@ router.get('/setup', (req, res) => {
         return;
     }
 
-    SerialPort.list()
-    .then((deviceList) => {
+    SerialPort.list().then((deviceList) => {
         serialPorts = deviceList.map(port => ({
             path: port.path,
             friendlyName: port.friendlyName,
@@ -162,7 +160,7 @@ router.get('/setup', (req, res) => {
                 memoryHeap: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1) + ' MB',
                 processUptime: formattedProcessUptime,
                 consoleOutput: logs,
-                plugins: allPluginConfigs,
+                plugins: require('./plugins'),
                 enabledPlugins: updatedConfig.plugins,
                 onlineUsers: dataHandler.dataToSend.users,
                 connectedUsers: storage.connectedUsers,
@@ -308,7 +306,7 @@ router.post('/saveData', (req, res) => {
     let firstSetup;
     if(req.session.isAdminAuthenticated || !configExists()) {
         configUpdate(data);
-        fmdxList.update();
+        serverList.update();
 
         if(!configExists()) firstSetup = true;
         logInfo('Server config changed successfully.');

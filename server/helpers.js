@@ -400,11 +400,17 @@ function startPluginsWithDelay(plugins, delay) {
 function findServerFiles(plugins) {
   let results = [];
   plugins.forEach(plugin => {
-    // Remove .js extension if present
     if (plugin.endsWith('.js')) plugin = plugin.slice(0, -3);
 
     const pluginPath = path.join(__dirname, '..', 'plugins', `${plugin}_server.js`);
     if (fs.existsSync(pluginPath) && fs.statSync(pluginPath).isFile()) results.push(pluginPath);
+  });
+
+  require("./plugins").forEach(config => {
+    if(config.backEndPath) {
+      const pluginPath = config.backEndPath;
+      if (fs.existsSync(pluginPath) && fs.statSync(pluginPath).isFile()) results.push(pluginPath);
+    }
   });
   return results;
 }

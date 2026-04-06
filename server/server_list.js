@@ -8,8 +8,6 @@ var os = require('os');
 let timeoutID = null;
 
 function send(request) {
-  const url = "https://servers.fmdx.org/api/";
-
   const options = {
     method: 'POST',
     headers: {
@@ -19,7 +17,7 @@ function send(request) {
     body: JSON.stringify(request)
   };
 
-  fetch(url, options)
+  fetch("https://servers.fmdx.org/api/", options)
     .then(response => response.json())
     .then(data => {
         if (data.success && data.token) {
