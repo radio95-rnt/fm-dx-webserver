@@ -219,7 +219,7 @@ async function fetchTx(freq, piCode, rdsPs) {
 
     const key = `${freq}|${piCode.toUpperCase()}`;
     var rawMatches = piFreqIndex[key] || [];
-    rawMatches = [...storage.tx_search_hook[key], ...rawMatches];
+    rawMatches = [...(storage.tx_search_hook[key] || []), ...rawMatches];
 
     // Format the results into the same structure as before
     let filteredLocations = rawMatches.map(({ station, ...locData }) => ({
