@@ -61,15 +61,12 @@ let currentUsers = 0;
 let timeoutAntenna;
 
 wss.on('connection', (ws, request) => {
-    const output = storage.ctl_output;
     let clientIp = helpers.getIpAddress(request);
     const userCommandHistory = {};
 
     // Per-IP limit connection open
     if (clientIp) {
-        const isLocalIp = (
-            clientIp === '127.0.0.1' || clientIp === '::1' ||
-            clientIp.startsWith('192.168.') || clientIp.startsWith('10.') || clientIp.startsWith('172.16.'));
+        const isLocalIp = (clientIp === '127.0.0.1' || clientIp === '::1' || clientIp.startsWith('192.168.') || clientIp.startsWith('10.') || clientIp.startsWith('172.16.'));
         if (!isLocalIp) {
             if (!ipConnectionCounts.has(clientIp)) ipConnectionCounts.set(clientIp, 0);
             const currentCount = ipConnectionCounts.get(clientIp);
@@ -117,7 +114,7 @@ wss.on('connection', (ws, request) => {
         const command = helpers.antispamProtection(message, clientIp, ws, userCommands, lastWarn, userCommandHistory, '18', 'text', 16 * 1024);
 
         if (!clientIp.includes("127.0.0.1")) {
-            if (((command.startsWith('X') || command.startsWith('Y')) && !request.session.isAdminAuthenticated) ||
+            if (!request.session.isAdminAuthenticated && (command.startsWith('X') || command.startsWith('Y') || command.startsWith("D") || command.startsWith("")) ||
                ((command.startsWith('F') || command.startsWith('W')) && serverConfig.bwSwitch === false)) {
                 logWarn(`User \x1b[90m${clientIp}\x1b[0m attempted to send a potentially dangerous command: ${command.slice(0, 64)}.`);
                 return;
@@ -160,7 +157,7 @@ wss.on('connection', (ws, request) => {
             if (tuningLimit && (tuneFreq < tuningLowerLimit || tuneFreq > tuningUpperLimit) || isNaN(tuneFreq)) return;
         }
 
-        if ((serverConfig.publicTuner && !serverConfig.lockToAdmin) || isAdminAuthenticated || (!serverConfig.publicTuner && !serverConfig.lockToAdmin && isTuneAuthenticated)) output.write(`${command}\n`);
+        if ((serverConfig.publicTuner && !serverConfig.lockToAdmin) || isAdminAuthenticated || (!serverConfig.publicTuner && !serverConfig.lockToAdmin && isTuneAuthenticated)) storage.ctl_output.write(`${command}\n`);
     });
 
     ws.on('close', (code) => {
@@ -191,35 +188,34 @@ wss.on('connection', (ws, request) => {
       if (currentUsers === 0) {
           storage.connectedUsers = [];
 
-          if (serverConfig.bwAutoNoUsers === "1") output.write("W0\n"); // Auto BW 'Enabled'
+          if (serverConfig.bwAutoNoUsers === "1") storage.ctl_output.write("W0\n"); // Auto BW 'Enabled'
 
           // cEQ and iMS combinations
-          if (serverConfig.ceqNoUsers === "1" && serverConfig.imsNoUsers === "1") output.write("G00\n"); // Both Disabled
-          else if (serverConfig.ceqNoUsers === "1" && serverConfig.imsNoUsers === "0") output.write(`G0${dataHandler.dataToSend.ims}\n`);
-          else if (serverConfig.ceqNoUsers === "0" && serverConfig.imsNoUsers === "1") output.write(`G${dataHandler.dataToSend.eq}0\n`);
-          else if (serverConfig.ceqNoUsers === "2" && serverConfig.imsNoUsers === "0") output.write(`G1${dataHandler.dataToSend.ims}\n`);
-          else if (serverConfig.ceqNoUsers === "0" && serverConfig.imsNoUsers === "2") output.write(`G${dataHandler.dataToSend.eq}1\n`);
-          else if (serverConfig.ceqNoUsers === "2" && serverConfig.imsNoUsers === "1") output.write("G10\n"); // Only cEQ enabled
-          else if (serverConfig.ceqNoUsers === "1" && serverConfig.imsNoUsers === "2") output.write("G01\n"); // Only iMS enabled
-          else if (serverConfig.ceqNoUsers === "2" && serverConfig.imsNoUsers === "2") output.write("G11\n"); // Both Enabled
+          if (serverConfig.ceqNoUsers === "1" && serverConfig.imsNoUsers === "1") storage.ctl_output.write("G00\n"); // Both Disabled
+          else if (serverConfig.ceqNoUsers === "1" && serverConfig.imsNoUsers === "0") storage.ctl_output.write(`G0${dataHandler.dataToSend.ims}\n`);
+          else if (serverConfig.ceqNoUsers === "0" && serverConfig.imsNoUsers === "1") storage.ctl_output.write(`G${dataHandler.dataToSend.eq}0\n`);
+          else if (serverConfig.ceqNoUsers === "2" && serverConfig.imsNoUsers === "0") storage.ctl_output.write(`G1${dataHandler.dataToSend.ims}\n`);
+          else if (serverConfig.ceqNoUsers === "0" && serverConfig.imsNoUsers === "2") storage.ctl_output.write(`G${dataHandler.dataToSend.eq}1\n`);
+          else if (serverConfig.ceqNoUsers === "2" && serverConfig.imsNoUsers === "1") storage.ctl_output.write("G10\n"); // Only cEQ enabled
+          else if (serverConfig.ceqNoUsers === "1" && serverConfig.imsNoUsers === "2") storage.ctl_output.write("G01\n"); // Only iMS enabled
+          else if (serverConfig.ceqNoUsers === "2" && serverConfig.imsNoUsers === "2") storage.ctl_output.write("G11\n"); // Both Enabled
 
           // Handle stereo mode
-          if (serverConfig.stereoNoUsers === "1") output.write("B0\n");
-          else if (serverConfig.stereoNoUsers === "2") output.write("B1\n");
+          if (serverConfig.stereoNoUsers === "1") storage.ctl_output.write("B0\n");
+          else if (serverConfig.stereoNoUsers === "2") storage.ctl_output.write("B1\n");
 
           // Handle Antenna selection
           if (timeoutAntenna) clearTimeout(timeoutAntenna);
           timeoutAntenna = setTimeout(() => {
-              if (serverConfig.antennaNoUsers === "1") output.write("Z0\n");
-              else if (serverConfig.antennaNoUsers === "2") output.write("Z1\n");
-              else if (serverConfig.antennaNoUsers === "3") output.write("Z2\n");
-              else if (serverConfig.antennaNoUsers === "4") output.write("Z3\n");
+              if (serverConfig.antennaNoUsers === "1") storage.ctl_output.write("Z0\n");
+              else if (serverConfig.antennaNoUsers === "2") storage.ctl_output.write("Z1\n");
+              else if (serverConfig.antennaNoUsers === "3") storage.ctl_output.write("Z2\n");
+              else if (serverConfig.antennaNoUsers === "4") storage.ctl_output.write("Z3\n");
           }, serverConfig.antennaNoUsersDelay ? 15000 : 0);
       }
 
       if (tunerLockTracker.has(ws)) {
         logInfo(`User who locked the tuner left. Unlocking the tuner.`);
-        output.write('wT0\n') // Why are we telling the tuner that?
         tunerLockTracker.delete(ws);
         serverConfig.publicTuner = true;
       }
@@ -228,7 +224,7 @@ wss.on('connection', (ws, request) => {
           serverConfig.autoShutdown !== true && serverConfig.xdrd.wirelessConnection === true) {
           setTimeout(function() {
               if (currentUsers === 0) {
-                  output.write('T' + Math.round(serverConfig.defaultFreq * 1000) + '\n');
+                  storage.ctl_output.write('T' + Math.round(serverConfig.defaultFreq * 1000) + '\n');
                   dataHandler.resetToDefault(dataHandler.dataToSend);
                   dataHandler.dataToSend.freq = Number(serverConfig.defaultFreq).toFixed(3);
                   dataHandler.initialData.freq = Number(serverConfig.defaultFreq).toFixed(3);
@@ -254,10 +250,11 @@ pluginsWss.on('connection', (ws, request) => {
 
     ws.on('message', message => {
         // Anti-spam
-        helpers.antispamProtection(message, clientIp, ws, userCommands, lastWarn, userCommandHistory, '10', 'data_plugins');
+        const msg2 = helpers.antispamProtection(message, clientIp, ws, userCommands, lastWarn, userCommandHistory, '10', 'data_plugins');
+        if(!msg2) return;
 
         try {
-            let messageData = JSON.parse(message); // Attempt to parse the JSON. This code will attemp to parse json using the JSON.parse which coincidentally actually parses the json
+            let messageData = JSON.parse(msg2); // Attempt to parse the JSON. This code will attemp to parse json using the JSON.parse which coincidentally actually parses the json
 
             if (messageData.type === "GPS" && messageData.value) {
                 const gpsData = messageData.value;

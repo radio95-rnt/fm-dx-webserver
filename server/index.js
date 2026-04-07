@@ -11,14 +11,14 @@ tunnel.download();
 
 require("./device");
 
+require('./stream/index');
+const startServer = require("./web");
+
 {
   const helpers = require('./helpers');
   const plugins = helpers.findServerFiles(serverConfig.plugins);
   if (plugins.length > 0) setTimeout(helpers.startPluginsWithDelay, 3000, plugins, 3000);
 }
-
-require('./stream/index');
-const startServer = require("./web");
 
 startServer(serverConfig.webserver.webserverIp === '0.0.0.0' ? 'localhost' : serverConfig.webserver.webserverIp);
 

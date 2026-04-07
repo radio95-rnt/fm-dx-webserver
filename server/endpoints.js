@@ -36,8 +36,7 @@ router.get('/', (req, res) => {
     if (configExists() === false) {
         let serialPorts;
 
-        SerialPort.list()
-        .then((deviceList) => {
+        SerialPort.list().then((deviceList) => {
             serialPorts = deviceList.map(port => ({
                 path: port.path,
                 friendlyName: port.friendlyName,
@@ -48,7 +47,6 @@ router.get('/', (req, res) => {
                     isAdminAuthenticated: true,
                     videoDevices: result.audioDevices,
                     audioDevices: result.videoDevices,
-                    serialPorts: serialPorts,
                     serialPorts: serialPorts,
                     tunerProfiles: tunerProfiles.map((profile) => ({
                         id: profile.id,
@@ -90,9 +88,7 @@ router.get('/403', (req, res) => {
     res.render('403', { reason });
 })
 
-router.get('/audioonly', (req, res) => {
-    res.render('audioonly');
-})
+router.get('/audioonly', (req, res) => res.render('audioonly'))
 
 router.get('/wizard', (req, res) => {
     let serialPorts;
@@ -102,8 +98,7 @@ router.get('/wizard', (req, res) => {
         return;
     }
 
-    SerialPort.list()
-    .then((deviceList) => {
+    SerialPort.list().then((deviceList) => {
         serialPorts = deviceList.map(port => ({
             path: port.path,
             friendlyName: port.friendlyName,
@@ -176,15 +171,6 @@ router.get('/setup', (req, res) => {
     })
 });
 
-
-router.get('/rds', (req, res) => {
-    res.send('Please connect using a WebSocket compatible app to obtain the RDS stream.');
-});
-
-router.get('/rdsspy', (req, res) => {
-    res.send('Please connect using a WebSocket compatible app to obtain the RDS stream.');
-});
-
 router.get('/api', (req, res) => {
     const { ps_errors, rt0_errors, rt1_errors, ims, eq, ant, st_forced, previousFreq, txInfo, rdsMode, ...dataToSend } = dataHandler.dataToSend;
     res.json({
@@ -196,9 +182,8 @@ router.get('/api', (req, res) => {
     });
 });
 
-
 const loginAttempts = {}; // Format: { 'ip': { count: 1, lastAttempt: 1234567890 } }
-const MAX_ATTEMPTS = 10;
+const MAX_ATTEMPTS = 8;
 const WINDOW_MS = 15 * 60 * 1000;
 
 const authenticate = (req, res, next) => {
@@ -242,9 +227,7 @@ router.post('/login', authenticate, (req, res) => {
 
 router.get('/logout', (req, res) => {
     // Clear the session and redirect to the main page
-    req.session.destroy(() => {
-        res.status(200).json({ message: 'Logged out successfully, refreshing the page...' });
-    });
+    req.session.destroy(() => res.status(200).json({ message: 'Logged out successfully, refreshing the page...' }));
 });
 
 router.get('/kick', (req, res) => {
@@ -254,9 +237,7 @@ router.get('/kick', (req, res) => {
         res.status(403);
         return;
     }
-    setTimeout(() => {
-        res.redirect('/setup');
-    }, 500);
+    setTimeout(res.redirect, 500, "/setup");
 });
 
 router.get('/addToBanlist', (req, res) => {
@@ -300,7 +281,6 @@ router.get('/removeFromBanlist', (req, res) => {
     res.json({ success: true, message: 'IP address removed from banlist.' });
 });
 
-
 router.post('/saveData', (req, res) => {
     const data = req.body;
     let firstSetup;
@@ -331,11 +311,8 @@ router.get('/getData', (req, res) => {
 });
 
 router.get('/getDevices', (req, res) => {
-    if (req.session.isAdminAuthenticated || !fs.existsSync(configName + '.json')) {
-        parseAudioDevice((result) => {
-            res.json(result);
-        });
-    } else res.status(403).json({ error: 'Unauthorized' });
+    if (req.session.isAdminAuthenticated || !fs.existsSync(configName + '.json')) parseAudioDevice(res.json);
+    else res.status(403).json({ error: 'Unauthorized' });
 });
 
 /* Static data are being sent through here on connection - these don't change when the server is running */
@@ -360,22 +337,18 @@ router.get('/server_time', (req, res) => {
     res.json({ serverTime: serverTimeUTC });
 });
 
-router.get('/ping', (req, res) => {
-    res.send('pong');
-});
+router.get('/ping', (req, res) => res.send('pong'));
 
 const logHistory = {};
 
 // Function to check if the ID has been logged within the last 60 minutes
 function canLog(id) {
     const now = Date.now();
-    const sixtyMinutes = 60 * 60 * 1000; // 60 minutes in milliseconds
+    const sixtyMinutes = 60 * 60 * 1000;
 
     // Remove expired entries
     for (const [entryId, timestamp] of Object.entries(logHistory)) {
-        if ((now - timestamp) >= sixtyMinutes) {
-            delete logHistory[entryId];
-        }
+        if ((now - timestamp) >= sixtyMinutes) delete logHistory[entryId];
     }
 
     if (logHistory[id] && (now - logHistory[id]) < sixtyMinutes) return false; // Deny logging if less than 60 minutes have passed
@@ -440,16 +413,8 @@ router.get('/log_fmlist', (req, res) => {
 
     const request = https.request(options, (response) => {
         let data = '';
-
-        // Collect response chunks
-        response.on('data', (chunk) => {
-            data += chunk;
-        });
-
-        // Response ended
-        response.on('end', () => {
-            res.status(200).send(data);
-        });
+        response.on('data', (chunk) => data += chunk);
+        response.on('end', () => res.status(200).send(data));
     });
 
     // Handle errors in the request

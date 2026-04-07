@@ -57,8 +57,7 @@ function authenticateWithXdrd(client, salt, password) {
   sha1.update(saltBuffer);
   sha1.update(passwordBuffer);
 
-  const hashedPassword = sha1.digest('hex');
-  client.write(hashedPassword + '\n');
+  client.write(sha1.digest('hex') + '\n');
   client.write('x\n');
 }
 
@@ -120,8 +119,7 @@ function handleConnect(clientIp, currentUsers, ws, callback) {
   }
 
   if (ipInfoInFlight.has(clientIp)) {
-    ipInfoInFlight
-      .get(clientIp)
+    ipInfoInFlight.get(clientIp)
       .then((info) => processConnection(clientIp, info, currentUsers, ws, callback))
       .catch(() => processConnection(clientIp, { country: undefined }, currentUsers, ws, callback));
     return;

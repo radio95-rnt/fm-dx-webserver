@@ -42,9 +42,7 @@ function connectToSerial() {
   serialport.open((err) => {
     if (err) {
       logError('Error opening port: ' + err.message);
-      setTimeout(() => {
-          connectToSerial();
-      }, 5000);
+      setTimeout(connectToSerial, 5000);
       return;
     }
 
@@ -78,7 +76,7 @@ function connectToSerial() {
       serverConfig.audio.startupVolume
         ? serialport.write('Y' + (serverConfig.audio.startupVolume * 100).toFixed(0) + '\n')
         : serialport.write('Y100\n');
-    }, 6000);
+    }, 2000);
 
     serialport.on('data', helpers.resolveDataBuffer);
     serialport.on('error', (error) => logError(error.message));

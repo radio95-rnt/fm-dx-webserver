@@ -209,8 +209,7 @@ function handleData(wss, receivedData, rdsWss) {
   }
 
   // Get the received TX info
-  fetchTx(parseFloat(dataToSend.freq).toFixed(1), dataToSend.pi, dataToSend.ps)
-  .then((currentTx) => {
+  fetchTx(parseFloat(dataToSend.freq).toFixed(1), dataToSend.pi, dataToSend.ps).then((currentTx) => {
       if (currentTx && currentTx.station !== undefined && parseInt(currentTx.distance) < 4000) {
           dataToSend.txInfo = {
               tx: currentTx.station,
@@ -227,8 +226,7 @@ function handleData(wss, receivedData, rdsWss) {
               score: currentTx.score,
           };
       }
-  })
-  .catch((error) => console.log("Error fetching Tx info:", error));
+  }).catch((error) => console.log("Error fetching Tx info:", error));
 
   // Send the updated data to the client
   const dataToSendJSON = JSON.stringify(dataToSend);
