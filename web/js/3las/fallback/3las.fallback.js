@@ -17,16 +17,11 @@ var Fallback_Settings = /** @class */ (function () {
 var Fallback = /** @class */ (function () {
     function Fallback(logger, settings) {
         this.Logger = logger;
-        if (!this.Logger) {
-            this.Logger = new Logging(null, null);
-        }
+        if (!this.Logger) this.Logger = new Logging(null, null);
         // Create audio context
-        if (typeof AudioContext !== "undefined")
-            this.Audio = new AudioContext();
-        else if (typeof webkitAudioContext !== "undefined")
-            this.Audio = new webkitAudioContext();
-        else if (typeof mozAudioContext !== "undefined")
-            this.Audio = new mozAudioContext();
+        if (typeof AudioContext !== "undefined") this.Audio = new AudioContext();
+        else if (typeof webkitAudioContext !== "undefined") this.Audio = new webkitAudioContext();
+        else if (typeof mozAudioContext !== "undefined") this.Audio = new mozAudioContext();
         else {
             this.Logger.Log('3LAS: Browser does not support "AudioContext".');
             throw new Error();
@@ -120,17 +115,13 @@ var Fallback = /** @class */ (function () {
         }
     };
     // Callback function from socket connection
-    Fallback.prototype.OnSocketError = function (message) {
-    };
-    Fallback.prototype.OnSocketConnect = function () {
-    };
-    Fallback.prototype.OnSocketDisconnect = function () {
-    };
+    Fallback.prototype.OnSocketError = function (message) {};
+    Fallback.prototype.OnSocketConnect = function () {};
+    Fallback.prototype.OnSocketDisconnect = function () {};
     Fallback.prototype.OnSocketDataReady = function (data) {
         this.PacketModCounter++;
         if (this.PacketModCounter > 100) {
-            if (this.ActivityCallback)
-                this.ActivityCallback();
+            if (this.ActivityCallback) this.ActivityCallback();
             this.PacketModCounter = 0;
         }
         this.FormatReader.PushData(new Uint8Array(data));

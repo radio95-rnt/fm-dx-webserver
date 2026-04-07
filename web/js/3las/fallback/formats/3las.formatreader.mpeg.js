@@ -88,9 +88,7 @@ var AudioFormatReader_MPEG = /** @class */ (function (_super) {
             expectedTotalPlayTime_1 += lastGranulePlayTime_1;
             bufferLength += this.Frames[this.Frames.length - 1].Data.length;
             // If needed, add some space for the ID3v2 tag
-            if (this.AddId3Tag) {
-                bufferLength += AudioFormatReader_MPEG.Id3v2Tag.length;
-            }
+            if (this.AddId3Tag) bufferLength += AudioFormatReader_MPEG.Id3v2Tag.length;
             // Create a buffer long enough to hold everything
             var decodeBuffer = new Uint8Array(bufferLength);
             var offset = 0;
@@ -109,8 +107,7 @@ var AudioFormatReader_MPEG = /** @class */ (function (_super) {
             // Increment Id
             var id_1 = this.Id++;
             // Check if decoded frames might be too far back in the past
-            if (!this.OnBeforeDecode(id_1, expectedTotalPlayTime_1))
-                return;
+            if (!this.OnBeforeDecode(id_1, expectedTotalPlayTime_1)) return;
             // Push window to the decoder
             this.Audio.decodeAudioData(decodeBuffer.buffer, (function (decodedData) {
                 var _id = id_1;
@@ -133,8 +130,7 @@ var AudioFormatReader_MPEG = /** @class */ (function (_super) {
                     // Sync found, set frame start
                     this.FrameStartIdx = i;
                     break;
-                }
-                i++;
+                } i++;
             }
         }
         // Find frame end
@@ -172,22 +168,17 @@ var AudioFormatReader_MPEG = /** @class */ (function (_super) {
     };
     // Checks if there is a frame ready to be extracted
     AudioFormatReader_MPEG.prototype.CanExtractFrame = function () {
-        if (this.FrameStartIdx < 0 || this.FrameEndIdx < 0)
-            return false;
-        else if (this.FrameEndIdx <= this.DataBuffer.length)
-            return true;
-        else
-            return false;
+        if (this.FrameStartIdx < 0 || this.FrameEndIdx < 0) return false;
+        else if (this.FrameEndIdx <= this.DataBuffer.length) return true;
+        else return false;
     };
     // Extract a single frame from the buffer
     AudioFormatReader_MPEG.prototype.ExtractFrame = function () {
         // Extract frame data from buffer
         var frameArray = this.DataBuffer.buffer.slice(this.FrameStartIdx, this.FrameEndIdx);
         // Remove frame from buffer
-        if ((this.FrameEndIdx + 1) < this.DataBuffer.length)
-            this.DataBuffer = new Uint8Array(this.DataBuffer.buffer.slice(this.FrameEndIdx));
-        else
-            this.DataBuffer = new Uint8Array(0);
+        if ((this.FrameEndIdx + 1) < this.DataBuffer.length) this.DataBuffer = new Uint8Array(this.DataBuffer.buffer.slice(this.FrameEndIdx));
+        else this.DataBuffer = new Uint8Array(0);
         // Reset Start/End indices
         this.FrameStartIdx = 0;
         this.FrameEndIdx = -1;

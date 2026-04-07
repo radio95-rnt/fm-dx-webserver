@@ -1,27 +1,16 @@
 var audioStreamRestartInterval;
 var elapsedTimeConnectionWatchdog;
-var _3LAS_Settings = /** @class */ (function () {
-    function _3LAS_Settings() {
-        this.SocketHost = location.hostname ? location.hostname : "127.0.0.1";
-        this.SocketPort = location.port;
-        this.SocketPath = "/";
-        this.Fallback = new Fallback_Settings();
-    }
-    return _3LAS_Settings;
-}());
 var _3LAS = /** @class */ (function () {
-    function _3LAS(logger, settings) {
+    function _3LAS(url, logger) {
+        this.wsurl = url;
         this.Logger = logger;
-        if (!this.Logger) {
-            this.Logger = new Logging(null, null);
-        }
-        this.Settings = settings;
+        if (!this.Logger) this.Logger = new Logging(null, null);
 
         try {
-            this.Fallback = new Fallback(this.Logger, this.Settings.Fallback);
+            this.Fallback_Settings = new Fallback_Settings();
+            this.Fallback = new Fallback(this.Logger, this.Fallback_Settings);
             this.Fallback.ActivityCallback = this.OnActivity.bind(this);
-        }
-        catch (_b) {
+        } catch (_b) {
             this.Fallback = null;
         }
 
@@ -29,9 +18,7 @@ var _3LAS = /** @class */ (function () {
             this.Logger.Log('3LAS: Browser does not support either media handling methods.');
             throw new Error();
         }
-        if (isAndroid) {
-            this.WakeLock = new WakeLock(this.Logger);
-        }
+        if (isAndroid) this.WakeLock = new WakeLock(this.Logger);
     }
     Object.defineProperty(_3LAS.prototype, "Volume", {
         get: function () {
@@ -52,9 +39,7 @@ var _3LAS = /** @class */ (function () {
 
         // Restart audio stream if radio data connection was reestablished
         // to prevent stuttering audio in some cases
-        if (audioStreamRestartInterval) {
-            clearInterval(audioStreamRestartInterval);
-        }
+        if (audioStreamRestartInterval) clearInterval(audioStreamRestartInterval);
         audioStreamRestartInterval = setInterval(() => {
           if (requiresAudioStreamRestart) {
             requiresAudioStreamRestart = false;
@@ -90,12 +75,9 @@ var _3LAS = /** @class */ (function () {
         }, 3000);
 
         // This is stupid, but required for Android.... thanks Google :(
-        if (this.WakeLock)
-            this.WakeLock.Begin();
+        if (this.WakeLock) this.WakeLock.Begin();
         try {
-            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const url = `${wsProtocol}//${location.hostname}/audio`;
-            this.WebSocket = new WebSocketClient(this.Logger, url , this.OnSocketError.bind(this), this.OnSocketConnect.bind(this), this.OnSocketDataReady.bind(this), this.OnSocketDisconnect.bind(this));
+            this.WebSocket = new WebSocketClient(this.Logger, this.wsurl , this.OnSocketError.bind(this), this.OnSocketConnect.bind(this), this.OnSocketDataReady.bind(this), this.OnSocketDisconnect.bind(this));
             this.Logger.Log("Init of WebSocketClient succeeded");
             this.Logger.Log("Trying to connect to server.");
         }

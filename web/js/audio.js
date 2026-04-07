@@ -7,6 +7,7 @@ class WebSocketAudioPlayer {
     this.sourceBuffer = null;
     this.queue = [];
     this.started = false;
+    this._volume = 1;
   }
 
   supported() {
@@ -21,7 +22,7 @@ class WebSocketAudioPlayer {
     const liveEdge = buffered.end(buffered.length - 1);
     const lag = liveEdge - this.audio.currentTime;
 
-    if (lag > .9) this.audio.currentTime = liveEdge - 0.2;  // snap to near live edge
+    if (lag > .85) this.audio.currentTime = liveEdge - 0.2;  // snap to near live edge
   }
 
   Start() {
@@ -59,8 +60,13 @@ class WebSocketAudioPlayer {
     this.started = false;
   }
 
-  setVolume(v) {
-    if (this.audio) this.audio.volume = Math.max(0, Math.min(1, v));
+  get Volume() {
+    return this._volume;
+  }
+  set Volume(v) {
+    const actual = Math.max(0, Math.min(1, v))
+    if (this.audio) this.audio.volume = actual;
+    this._volume = actual;
   }
 
   _appendNext() {
@@ -87,16 +93,12 @@ function createStream() {
     if (MediaSource.isTypeSupported("audio/mpeg")) {
       firefox = false;
       Stream = new WebSocketAudioPlayer(url);
-      Stream.setVolume($('#volumeSlider').val());
     } else {
       firefox = true;
       alert("Your browser does not support MP3 over MSE, meaning we have to use 3LAS which is terrible and gives terrible audio quality. If you want better sound, switch to anything chromium based")
-      const settings = new _3LAS_Settings();
-      Stream = new _3LAS(null, settings);
-      Stream.Volume = $('#volumeSlider').val();
-      Stream.ConnectivityCallback = OnConnectivityCallback;
+      Stream = new _3LAS(url, null);
     }
-
+    Stream.Volume = $('#volumeSlider').val();
   } catch (error) {
     console.error("Initialization Error: ", error);
   }
@@ -130,22 +132,16 @@ function OnPlayButtonClick(_ev) {
 
     $playbutton.addClass('bg-gray').prop('disabled', true);
     setTimeout(() => $playbutton.removeClass('bg-gray').prop('disabled', false), 2000);
-    if (Stream && firefox) Stream.setVolume($("#volumeSlider").val());
 }
 
 function updateVolume() {
-  if(!firefox) {
-    const newVolume = $(this).val();
-    if (Stream) Stream.setVolume(newVolume);
-    else console.warn("Stream is not initialized.");
-  } else {
-    if(Stream) {
-      const newVolume = $(this).val();
-      newVolumeGlobal = newVolume;
-      console.log("Volume updated to:", newVolume);
-      Stream.Volume = newVolume;
-    } else console.warn("Stream is not initialized.");
+  const newVolume = $(this).val();
+  if(!Stream) {
+    console.warn("Stream is not initialized.");
+    return;
   }
+
+  Stream.Volume = newVolume;
 }
 
 $(document).ready(Init);

@@ -114,7 +114,7 @@ wss.on('connection', (ws, request) => {
         const command = helpers.antispamProtection(message, clientIp, ws, userCommands, lastWarn, userCommandHistory, '18', 'text', 16 * 1024);
 
         if (!clientIp.includes("127.0.0.1")) {
-            if (!request.session.isAdminAuthenticated && (command.startsWith('X') || command.startsWith('Y') || command.startsWith("D") || command.startsWith("")) ||
+            if (((command.startsWith('X') || command.startsWith('Y')) && !request.session.isAdminAuthenticated) ||
                ((command.startsWith('F') || command.startsWith('W')) && serverConfig.bwSwitch === false)) {
                 logWarn(`User \x1b[90m${clientIp}\x1b[0m attempted to send a potentially dangerous command: ${command.slice(0, 64)}.`);
                 return;
