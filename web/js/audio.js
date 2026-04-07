@@ -22,7 +22,7 @@ class WebSocketAudioPlayer {
     const liveEdge = buffered.end(buffered.length - 1);
     const lag = liveEdge - this.audio.currentTime;
 
-    if (lag > .85) this.audio.currentTime = liveEdge - 0.2;  // snap to near live edge
+    if (lag > 1) this.audio.currentTime = liveEdge - 0.25;  // snap to near live edge
   }
 
   Start() {
