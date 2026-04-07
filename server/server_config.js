@@ -123,7 +123,13 @@ let serverConfig = {
   antennaStartup: "0",
   antennaNoUsers: "0",
   antennaNoUsersDelay: false,
-  trustedProxies: []
+  trustedProxies: [],
+  webRtc: {
+    flags: {
+      disable3las: false
+    },
+    audio: {}
+  }
 };
 
 // Function to add missing fields without overwriting existing values

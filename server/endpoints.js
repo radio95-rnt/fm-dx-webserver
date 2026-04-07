@@ -339,13 +339,15 @@ router.get('/server_time', (req, res) => {
 
 router.get('/ping', (req, res) => res.send('pong'));
 
-// techkrzysiek's WebRTC plugin integration from the Miedzyzdroje server.
-router.get('/webrtc-audio-flags.json', (req, res) => res.json({disable3las: false}));
-// /webrtc-audio.conf should serve a list of supported WebRTC endpoints; like this "56000:https://webrtc.fmdx.pro/miedzyzdroje_56k/whep"; each entry is seperated by a semicolon
-// We should be able to use mediamtx for SDP/WHEP and the WebRTC itself.
-
-// Testing only! TODO: Add this to config
-router.get('/webrtc-audio.conf', (req, res) => res.send("192000:https://batorego.flerken.pl.eu.org/webrtc/whep192/whep"));
+router.get('/webrtc-audio-flags.json', (req, res) => res.json(serverConfig.webRtc.flags));
+router.get('/webrtc-audio.conf', (req, res) => {
+    let out = "";
+    res.send("192000:https://batorego.flerken.pl.eu.org/webrtc/whep192/whep")
+    for (const [endpoint, bitrate] of Object.entries(serverConfig.webRtc.audio)) {
+        out += `${bitrate * 1000}:${endpoint};`;
+    }
+    res.send(out);
+});
 
 const logHistory = {};
 
