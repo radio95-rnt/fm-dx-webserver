@@ -348,7 +348,10 @@
         if (audioElement) {
             const volume = parseFloat($('#volumeSlider').val());
             audioElement.volume = Number.isFinite(volume) ? volume : 1;
-        }
+
+            // Kuba's patches, not techkrzysiek code
+            if(!Number.isFinite(volume)) logWebRTCDebug("Volume is not finite.");
+        } else logWebRTCDebug("audioElement not initialized.")
     }
 
     function initVolumeControl() {
