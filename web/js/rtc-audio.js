@@ -352,6 +352,7 @@
             // Kuba's patches, not techkrzysiek code
             if(!Number.isFinite(volume)) logWebRTCDebug("Volume is not finite.");
         } else logWebRTCDebug("audioElement not initialized.")
+        logWebRTCDebug("Volume update.");
     }
 
     function initVolumeControl() {
