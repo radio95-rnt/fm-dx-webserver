@@ -359,7 +359,8 @@
         const volumeSlider = document.getElementById('volumeSlider');
         if (volumeSlider) {
             volumeSlider.addEventListener('input', updateVolume);
-        }
+            logWebRTCDebug("Should be updating volume.");
+        } else logWebRTCDebug("volumeSlider not found")
         updateVolume();
     }
 
