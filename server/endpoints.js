@@ -345,7 +345,7 @@ router.get('/webrtc-audio-flags.json', (req, res) => res.json({disable3las: fals
 // We should be able to use mediamtx for SDP/WHEP and the WebRTC itself.
 
 // Testing only! TODO: Add this to config
-router.get('/webrtc-audio.conf', (req, res) => res.send("192000;https://batorego.flerken.pl.eu.org/webrtc/whep192/whep"));
+router.get('/webrtc-audio.conf', (req, res) => res.send("192000:https://batorego.flerken.pl.eu.org/webrtc/whep192/whep"));
 
 const logHistory = {};
 
