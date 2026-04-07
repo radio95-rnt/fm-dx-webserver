@@ -6,7 +6,7 @@
  * ************************************************
  */
 
-(() => {
+window.addEventListener('load', (() => {
     const WHEP_CONFIG_PATH = '/webrtc-audio.conf';
     const WHEP_FLAGS_PATH = '/webrtc-audio-flags.json';
     const LAST_BITRATE_COOKIE_NAME = 'webrtcAudioLastBitrate';
@@ -1333,4 +1333,4 @@
         reconnectAttempts = MAX_RECONNECT_ATTEMPTS;
         void stopWebRTC();
     });
-})();
+}), false);
