@@ -342,7 +342,6 @@ router.get('/ping', (req, res) => res.send('pong'));
 router.get('/webrtc-audio-flags.json', (req, res) => res.json(serverConfig.webRtc.flags));
 router.get('/webrtc-audio.conf', (req, res) => {
     let out = "";
-    res.send("192000:https://batorego.flerken.pl.eu.org/webrtc/whep192/whep")
     for (const [endpoint, bitrate] of Object.entries(serverConfig.webRtc.audio)) {
         out += `${bitrate * 1000}:${endpoint};`;
     }
