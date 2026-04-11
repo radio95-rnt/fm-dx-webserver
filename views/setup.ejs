@@ -342,7 +342,7 @@
                 <div class="panel-100 p-bottom-20" style="padding-right: 20px; padding-left: 20px;">
                     <h3>Connection type</h3>
                     <p class="text-gray">If you want to choose the serial port directly, choose "Direct".<br>If you use xdrd or your receiver is connected via Wi-Fi, choose TCP/IP.</p>
-                    <div class="auto top-10">
+                    <div class="auto top-10" style="max-width: 350px;">
                         <label class="toggleSwitch nolabel" onclick="">
                             <input id="xdrd-wirelessConnection" type="checkbox" tabindex="0" aria-label="Connection type"/>
                             <a></a>
@@ -393,17 +393,17 @@
                     <div class="panel-50 p-bottom-20">
                         <h3>Miscellaneous</h3>
                         <div class="flex-container">
-                            <div class="panel-50 no-bg">
+                            <div class="panel-33 no-bg">
                                 <h4>Bandwidth switch</h4>
                                 <p>Bandwidth switch allows the user to set the bandwidth manually.</p>
                                 <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Bandwidth switch', id: 'bwSwitch'}) %><br>
                             </div>
-                            <div class="panel-50 no-bg">
+                            <div class="panel-33 no-bg">
                                 <h4>Automatic shutdown</h4>
                                 <p>Toggling this option will put the tuner to sleep when no clients are connected.</p>
                                 <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Auto-shutdown', id: 'autoShutdown'}) %><br>
                             </div>
-                            <div class="panel-50 no-bg">
+                            <div class="panel-33 no-bg">
                                 <h4>SI47XX AGC control</h4>
                                 <p>Allow users to change SI47XX AGC mode from the main UI.</p>
                                 <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Enable AGC control', id: 'si47xx-agcControl'}) %><br>
