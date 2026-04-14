@@ -17,6 +17,7 @@ let serverConfig = {
   webserver: {
     webserverIp: "0.0.0.0",
     webserverPort: 8080,
+    // pe5pvbXdrGtkPort: null,
     banlist: [],
     chatEnabled: true,
     tuningLimit: false,
@@ -125,9 +126,7 @@ let serverConfig = {
   antennaNoUsersDelay: false,
   trustedProxies: [],
   webRtc: {
-    flags: {
-      disable3las: false
-    },
+    flags: {disable3las: false},
     audio: {}
   }
 };

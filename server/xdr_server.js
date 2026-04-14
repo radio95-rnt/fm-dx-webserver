@@ -14,7 +14,7 @@ function send_to_xdr(data) {
 }
 
 function send_xdr_online(fmusers) {
-  send_to_xdr(`o${currentUsers},${fmusers}\n`);
+  send_to_xdr(`o${currentUsers},${fmusers}\n`); // First value is normal users, and the second is the guest users, XDR-GTK displays them either as `2 users` or `2 ( + 1) users` if the guest number is non zero
 }
 
 function randomString(length) {
@@ -47,19 +47,22 @@ function xdr_auth(ws, salt) {
 xdr.on('connection', async (ws) => {
   const { initialData } = require('./datahandler');
 
-  const salt = randomString(16);
+  const salt = randomString(16); // 16 characters are needed, because XDR-GTK does not wait for the new line, but rather the 16 characters with a new line
   ws.send(`${salt}\n`);
 
   try {
     await xdr_auth(ws, salt);
   } catch (err) {
-    ws.send("a0\n");
+    ws.send("a0\n"); // a0 is sent when you have not authenticated
+    // a1 is sent when you also didnt authenticate, but you're a guest now! and not completly kicked out. im giving these comments because i think sjef is reading this, and he got the protocol VERY WRONG in his plugin for xdrgtk
     ws.close(1008, err.message);
     return;
   }
 
+  // ws.send(`$fmdx-webserver,${require('../package.json').version},${serverConfig.webserver.pe5pvbXdrGtkPort ?? serverConfig.webserver.webserverPort},/audio\n`); // Sjef's bullshit
+
   currentUsers++;
-  send_xdr_online(initialData.users);
+  send_xdr_online(initialData.users); // Broadcast
   ws.send(`T${initialData.freq * 1000}\n`);
   ws.send(`G${initialData.eq}${initialData.ims}\n`);
   ws.send(`Z${initialData.ant}\n`);
@@ -69,6 +72,7 @@ xdr.on('connection', async (ws) => {
   ws.send(`wL${serverConfig.lockToAdmin ? "1" : "0"}\n`);
   ws.send(`wT${serverConfig.publicTuner ? "0" : "1"}\n`);
   ws.send(`OK\n`); // Make sure dumbass clients don't need to wait long for the OK, does the protocol really REQUIRE you to start the receiver for you to know you are in?
+  // because x would start the receiver and send OK. it is NOT a part of the handshake
   clients.push(ws);
 
   ws.on('message', (message) => {
@@ -110,5 +114,6 @@ xdr.on('connection', async (ws) => {
 });
 
 storage.websocket_delegation.set("/xdr", xdr);
+storage.websocket_delegation.set("/xdrgtk", xdr);
 
 module.exports = { send_to_xdr, send_xdr_online };
