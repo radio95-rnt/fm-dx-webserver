@@ -59,8 +59,9 @@ xdr.on('connection', async (ws) => {
     return;
   }
 
-  ws.send(`$fmdx-webserver,${require('../package.json').version},${serverConfig.webserver.pe5pvbXdrGtkPort ?? serverConfig.webserver.webserverPort},/audio\n`); // Sjef's bullshit
 
+  ws.send(`OK\n`)
+  ws.send(`$fmdx-webserver,${require('../package.json').version},${serverConfig.webserver.pe5pvbXdrGtkPort ?? serverConfig.webserver.webserverPort},/audio\n`); // Sjef's bullshit
   currentUsers++;
   send_xdr_online(initialData.users); // Broadcast
   ws.send(`T${initialData.freq * 1000}\n`);
@@ -71,8 +72,7 @@ xdr.on('connection', async (ws) => {
   ws.send(`W${initialData.bw}\n`);
   ws.send(`wL${serverConfig.lockToAdmin ? "1" : "0"}\n`);
   ws.send(`wT${serverConfig.publicTuner ? "0" : "1"}\n`);
-  ws.send(`OK\n`); // Make sure dumbass clients don't need to wait long for the OK, does the protocol really REQUIRE you to start the receiver for you to know you are in?
-  // because x would start the receiver and send OK. it is NOT a part of the handshake
+  ws.send(`OK\n`)
   clients.push(ws);
 
   ws.on('message', (message) => {
