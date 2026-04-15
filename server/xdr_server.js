@@ -59,7 +59,7 @@ xdr.on('connection', async (ws) => {
     return;
   }
 
-  // ws.send(`$fmdx-webserver,${require('../package.json').version},${serverConfig.webserver.pe5pvbXdrGtkPort ?? serverConfig.webserver.webserverPort},/audio\n`); // Sjef's bullshit
+  ws.send(`$fmdx-webserver,${require('../package.json').version},${serverConfig.webserver.pe5pvbXdrGtkPort ?? serverConfig.webserver.webserverPort},/audio\n`); // Sjef's bullshit
 
   currentUsers++;
   send_xdr_online(initialData.users); // Broadcast
