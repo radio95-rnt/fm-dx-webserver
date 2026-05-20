@@ -77,10 +77,9 @@ if (process.platform === 'win32') {
 
 const pluginConfigs = [];
 readJSFiles(pluginsDir).forEach(file => {
-    var filePath = undefined;
-    if(fs.statSync(file).isFile()) filePath = path.join(pluginsDir, file);
-    else if(fs.statSync(file).isDirectory()) filePath = path.join(pluginsDir, file, file);
-    
+    var filePath = path.join(pluginsDir, file);
+    if(fs.statSync(filePath).isDirectory()) filePath = path.join(pluginsDir, file, file);
+
     const config = parsePluginConfig(filePath);
     if (Object.keys(config).length > 0) pluginConfigs.push(config);
 });
