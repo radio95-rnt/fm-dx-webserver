@@ -23,12 +23,7 @@ function parsePluginConfig(filePath) {
 
         if (pluginConfig.frontEndPath) {
             const sourcePath = path.join(path.dirname(filePath), pluginConfig.frontEndPath);
-
-            const destinationDir = path.join(
-                __dirname,
-                '../web/js/plugins',
-                path.relative(pluginsDir, path.dirname(sourcePath))
-            );
+            const destinationDir = path.join(__dirname, '../web/js/plugins', path.dirname(pluginConfig.frontEndPath));
 
             // Check if the source path exists
             if (!fs.existsSync(sourcePath)) {
