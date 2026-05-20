@@ -80,8 +80,8 @@ if (process.platform === 'win32') {
 
 const pluginConfigs = [];
 readJSFiles(pluginsDir).forEach(file => {
-    const dir = fs.statSync(filePath).isDirectory();
     var filePath = path.join(pluginsDir, file);
+    const dir = fs.statSync(filePath).isDirectory();
     if(dir) filePath = path.join(pluginsDir, file, file);
 
     const config = parsePluginConfig(filePath);
