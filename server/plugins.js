@@ -80,11 +80,14 @@ if (process.platform === 'win32') {
 
 const pluginConfigs = [];
 readJSFiles(pluginsDir).forEach(file => {
+    const dir = fs.statSync(filePath).isDirectory();
     var filePath = path.join(pluginsDir, file);
-    if(fs.statSync(filePath).isDirectory()) filePath = path.join(pluginsDir, file, file);
+    if(dir) filePath = path.join(pluginsDir, file, file);
 
     const config = parsePluginConfig(filePath);
-    if (Object.keys(config).length > 0) pluginConfigs.push(config);
+    if(dir) config = {...config, prefix: file}
+    else config = {...config, prefix: ""}
+    pluginConfigs.push(config);
 });
 
 module.exports = pluginConfigs;

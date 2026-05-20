@@ -420,12 +420,12 @@
                     <p>Any compatible <strong>.js</strong> plugin, which is in the "plugins" folder, will be listed here.<br>
                         Click on the individual plugins to enable/disable them.</p>
                         <select id="plugins" class="multiselect" multiple>
-                        <% plugins.forEach(function(plugin) { 
+                        <% plugins.forEach(function(plugin) {
                             if (plugin.frontEndPath) { %>
-                                <option data-name="<%= plugin.frontEndPath %>" title="<%= plugin.name %> by <%= plugin.author %> [v<%= plugin.version %>]">
+                                <option data-name="<%= plugin.prefix %><%= plugin.frontEndPath %>" title="<%= plugin.name %> by <%= plugin.author %> [v<%= plugin.version %>]">
                                     <%= plugin.name %> by <%= plugin.author %> [v<%= plugin.version %>]
                                 </option>
-                            <%  } 
+                            <%  }
                         }); %>
                         </select><br><br>
                         <a href="https://github.com/NoobishSVK/fm-dx-webserver/wiki/Plugin-List" target="_blank">Download new plugins here!</a>
