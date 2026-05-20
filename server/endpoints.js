@@ -14,7 +14,7 @@ const storage = require('./storage');
 const tunerProfiles = require('./tuner_profiles');
 const { logInfo, logs } = require('./console');
 const dataHandler = require('./datahandler');
-const serverList = require('./server_list');
+const serverListUpdate = require('./server_list');
 
 // Endpoints
 router.get('/', (req, res) => {
@@ -246,12 +246,7 @@ router.get('/addToBanlist', (req, res) => {
         return;
     }
 
-    const ipAddress = req.query.ip;
-    const location = 'Unknown';
-    const date = Date.now();
-    const reason = req.query.reason;
-
-    userBanData = [ipAddress, location, date, reason];
+    userBanData = [req.query.ip, 'Unknown', Date.now(), req.query.reason];
 
     if (typeof serverConfig.webserver.banlist !== 'object') serverConfig.webserver.banlist = [];
 
@@ -286,7 +281,7 @@ router.post('/saveData', (req, res) => {
     let firstSetup;
     if(req.session.isAdminAuthenticated || !configExists()) {
         configUpdate(data);
-        serverList.update();
+        serverListUpdate.update();
 
         if(!configExists()) firstSetup = true;
         logInfo('Server config changed successfully.');
@@ -327,7 +322,8 @@ router.get('/static_data', (req, res) => {
         rdsTimeout: serverConfig.webserver.rdsTimeout || 0,
         tunerName: serverConfig.identification.tunerName || '',
         tunerDesc: serverConfig.identification.tunerDesc || '',
-        ant: serverConfig.antennas || {}
+        ant: serverConfig.antennas || {},
+        fork: "radio95"
     });
 });
 
@@ -441,8 +437,7 @@ router.get('/tunnelservers', async (req, res) => {
     const servers = [
       { value: "eu", host: "eu.fmtuner.org", label: "Europe" },
       { value: "us", host: "us.fmtuner.org", label: "Americas" },
-      { value: "sg", host: "sg.fmtuner.org", label: "Asia & Oceania" },
-      { value: "pldx", host: "pldx.duckdns.org", label: "Poland (k201)" },
+      { value: "sg", host: "sg.fmtuner.org", label: "Asia & Oceania" }
     ];
 
     const results = await Promise.all(

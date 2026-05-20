@@ -43,7 +43,7 @@ async function connect() {
 
     const cfg = ejs.render(frpcConfigTemplate, {
       cfg: serverConfig.tunnel,
-      host: serverConfig.tunnel.community.enabled ? serverConfig.tunnel.community.host : ((serverConfig.tunnel.region == "pldx") ? "pldx.duckdns.org" : (serverConfig.tunnel.region + ".fmtuner.org")),
+      host: serverConfig.tunnel.community.enabled ? serverConfig.tunnel.community.host : (serverConfig.tunnel.region + ".fmtuner.org"),
       server: {
         port: serverConfig.webserver.webserverPort
       }

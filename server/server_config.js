@@ -94,7 +94,7 @@ let serverConfig = {
     enabled: false,
     username: "",
     token: "",
-    region: "pldx",
+    region: "eu",
     lowLatencyMode: false,
     subdomain: "",
     httpName: "",

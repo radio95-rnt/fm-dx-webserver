@@ -81,4 +81,4 @@ function update() {
   timeoutID = setInterval(sendKeepalive, 5 * 60 * 1000);
 }
 
-module.exports.update = update;
+module.exports = update;

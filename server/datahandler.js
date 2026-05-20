@@ -150,7 +150,7 @@ function handleData(wss, receivedData, rdsWss) {
       case receivedLine.startsWith('Ss'):
         processSignal(receivedLine, true, false);
         break;
-      case receivedLine.startsWith('SS'): // ss? oh no
+      case receivedLine.startsWith('SS'): // ss? germany mentioned?
         processSignal(receivedLine, true, true);
         break;
       case receivedLine.startsWith('SM'):
