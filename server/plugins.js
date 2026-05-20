@@ -26,10 +26,11 @@ function parsePluginConfig(filePath) {
             const destinationDir = path.join(__dirname, '../web/js/plugins', path.dirname(pluginConfig.frontEndPath));
 
             // Check if the source path exists
-            if (!fs.existsSync(sourcePath)) {
-                console.error(`Error: source path ${sourcePath} does not exist.`);
-                return pluginConfig;
-            }
+            const destinationDir = path.join(
+                __dirname,
+                '../web/js/plugins',
+                path.relative(pluginsDir, path.dirname(sourcePath))
+            );
 
             // Check if the destination directory exists, if not, create it
             if (!fs.existsSync(destinationDir)) fs.mkdirSync(destinationDir, { recursive: true }); // Create directory recursively
