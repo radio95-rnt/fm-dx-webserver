@@ -84,7 +84,7 @@ readJSFiles(pluginsDir).forEach(file => {
     const dir = fs.statSync(filePath).isDirectory();
     if(dir) filePath = path.join(pluginsDir, file, file);
 
-    const config = parsePluginConfig(filePath);
+    var config = parsePluginConfig(filePath);
     if(dir) config = {...config, prefix: file}
     else config = {...config, prefix: ""}
     pluginConfigs.push(config);
