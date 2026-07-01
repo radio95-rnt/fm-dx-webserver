@@ -433,7 +433,7 @@ function getIpAddress(request) {
   const xff = request.headers['x-forwarded-for'];
 
   if (xff && !isLocalhost(remoteIp) && !isTrustedProxy(remoteIp)) {
-    consoleCmd.logSecurity(`Untrusted proxy tried to set X-Forwarded-For: ${xff} (remote: ${remoteIpRaw})`);
+    consoleCmd.logWarn(`Untrusted proxy tried to set X-Forwarded-For: ${xff} (remote: ${remoteIpRaw})`);
     return remoteIp;
   }
 

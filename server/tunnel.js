@@ -1,4 +1,4 @@
-const { logDebug, logError, logInfo, logWarn, logFfmpeg } = require('./console');
+const { logDebug, logError, logInfo, logWarn } = require('./console');
 const { serverConfig } = require('./server_config');
 const { Readable } = require('stream');
 const { finished } = require('stream/promises');

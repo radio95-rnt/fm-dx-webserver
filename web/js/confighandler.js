@@ -91,9 +91,13 @@ function populateFields(data, prefix = "") {
   });
 }
 
+function safeId(str) {
+  return str.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
 function updateConfigData(data, prefix = "") {
   $.each(data, (key, value) => {
-    const id = `${prefix}${prefix ? "-" : ""}${key}`;
+    let id = `${prefix}${prefix ? "-" : ""}${safeId(key)}`;
     const $element = $(`#${id}`);
 
     if (key === "presets") {

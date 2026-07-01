@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 const { serverConfig, configExists } = require('./server_config');
-const { logChat } = require('./console');
+const { logInfo } = require('./console');
 const helpers = require('./helpers');
 const storage = require('./storage.js');
 
@@ -85,7 +85,7 @@ function createChatServer() {
             storage.chatHistory.push(messageData);
             if (storage.chatHistory.length > 50) storage.chatHistory.shift();
 
-            logChat(messageData);
+            logInfo(`${message.nickname} (${message.ip}) sent a chat message: ${message.message}`);
 
             chatWss.clients.forEach((client) => {
                 if (client.readyState === WebSocket.OPEN) {

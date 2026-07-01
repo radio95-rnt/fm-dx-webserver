@@ -6,7 +6,7 @@ const { serverConfig, configExists } = require('../server_config');
 if (!configExists() || !serverConfig.audio.audioDevice) return;
 
 const { spawn } = require('child_process');
-const { logDebug, logError, logInfo, logWarn, logFfmpeg } = require('../console');
+const { logDebug, logError, logInfo, logWarn } = require('../console');
 const checkFFmpeg = require('./checkFFmpeg');
 
 const consoleLogTitle = '[Audio Stream]';
@@ -84,7 +84,7 @@ checkFFmpeg().then((ffmpegPath) => {
 
         ffmpeg.stderr.on('data', (data) => {
             const msg = data.toString();
-            logFfmpeg(`[FFmpeg stderr]: ${msg}`);
+            logError(`[FFmpeg stderr]: ${msg}`);
 
             // Detect frozen timestamps
             const match = msg.match(/time=(\d\d):(\d\d):(\d\d\.\d+)/);

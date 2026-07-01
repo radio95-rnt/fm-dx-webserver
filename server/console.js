@@ -1,7 +1,6 @@
 const fs = require('fs').promises;
 
 const verboseMode = process.argv.includes('--debug');
-const verboseModeFfmpeg = process.argv.includes('--ffmpegdebug');
 
 const LOG_FILE = process.argv.includes('--config') && process.argv[process.argv.indexOf('--config') + 1]
   ? `serverlog_${process.argv[process.argv.indexOf('--config') + 1]}.txt`
@@ -15,13 +14,10 @@ let logBuffer = [];
 
 // Message prefixes with ANSI codes
 const MESSAGE_PREFIX = {
-    CHAT: "\x1b[36m[CHAT]\x1b[0m",
     DEBUG: "\x1b[36m[DEBUG]\x1b[0m",
     ERROR: "\x1b[31m[ERROR]\x1b[0m",
-    FFMPEG: "\x1b[36m[FFMPEG]\x1b[0m",
     INFO: "\x1b[32m[INFO]\x1b[0m",
     WARN: "\x1b[33m[WARN]\x1b[0m",
-    SECURITY: "\x1b[36m[SECURITY]\x1b[0m",
 };
 
 const getCurrentTime = () => {
@@ -36,28 +32,21 @@ const removeANSIEscapeCodes = (str) => str.replace(ANSI_ESCAPE_CODE_PATTERN, '')
 const logMessage = (type, messages) => {
     const logMessage = `${getCurrentTime()} ${MESSAGE_PREFIX[type]} ${messages.join(' ')}`;
 
-    if ((type === 'DEBUG' && verboseMode) || (type === 'FFMPEG' && verboseModeFfmpeg) || type !== 'DEBUG' && type !== 'FFMPEG') {
+    if ((type === 'DEBUG' && verboseMode) || type !== 'DEBUG') {
         logs.push(logMessage);
         if (logs.length > maxConsoleLogLines) logs.shift();
         console.log(logMessage);
     }
 
-    if(type !== 'FFMPEG') appendLogToBuffer(logMessage);
+    logBuffer.push(removeANSIEscapeCodes(logMessage) + '\n');
 };
 
-const logSecurity = (...messages) => logMessage('SECURITY', messages);
-const logDebug = (...messages) => logMessage('DEBUG', messages);
-const logChat = (message) => logMessage('CHAT', [`${message.nickname} (${message.ip}) sent a chat message: ${message.message}`]);
 const logError = (...messages) => logMessage('ERROR', messages);
-const logFfmpeg = (...messages) => logMessage('FFMPEG', messages, verboseModeFfmpeg);
-const logInfo = (...messages) => logMessage('INFO', messages);
 const logWarn = (...messages) => logMessage('WARN', messages);
+const logInfo = (...messages) => logMessage('INFO', messages);
+const logDebug = (...messages) => logMessage('DEBUG', messages);
 
-function appendLogToBuffer(logMessage) {
-    const cleanLogMessage = removeANSIEscapeCodes(logMessage);
-    logBuffer.push(cleanLogMessage + '\n');
-}
-appendLogToBuffer("Server started.");
+logBuffer.push("Server started.");
 
 async function flushLogBuffer() {
     if (logBuffer.length === 0) return;
@@ -90,4 +79,4 @@ process.on('exit', flushLogBuffer);
 process.on('SIGINT', gracefulExit);
 process.on('SIGTERM', gracefulExit);
 
-module.exports = { logError, logDebug, logFfmpeg, logInfo, logWarn, logs, logChat, logSecurity };
+module.exports = { logError, logDebug, logInfo, logWarn, logs };
