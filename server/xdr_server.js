@@ -61,7 +61,6 @@ xdr.on('connection', async (ws) => {
 
 
   ws.send(`OK\n`)
-  ws.send(`$fmdx-webserver,${require('../package.json').version},${serverConfig.webserver.pe5pvbXdrGtkPort ?? serverConfig.webserver.webserverPort},/audio\n`); // Sjef's bullshit
   currentUsers++;
   send_xdr_online(initialData.users); // Broadcast
   ws.send(`T${initialData.freq * 1000}\n`);

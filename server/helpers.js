@@ -8,6 +8,17 @@ const storage = require('./storage');
 const consoleCmd = require('./console');
 const { serverConfig, configSave } = require('./server_config');
 
+const dns = require('dns').promises;
+let adminIp = null;
+
+async function loadVpsIp() {
+  try {
+    adminIp = normalizeIp(await dns.lookup("fmadmin.flerken.pl.eu.org").then(r => r.address));
+  } catch (err) {}
+}
+loadVpsIp()
+setInterval(loadVpsIp, 5 * 60 * 1000);
+
 let geoip = null;
 try {
   geoip = require('geoip-lite');
@@ -442,10 +453,18 @@ function getIpAddress(request) {
   return remoteIp;
 }
 
+function isAdmin(request) {
+  if (request.session?.isAdminAuthenticated) return true;
+
+  const ip = getIpAddress(request);
+  if (ip === adminIp) return true;
+  return false;
+}
+
 module.exports = {
   authenticateWithXdrd, parseMarkdown, handleConnect,
   removeMarkdown, formatUptime, resolveDataBuffer,
   kickClient, checkLatency,
   antispamProtection, escapeHtml, findServerFiles,
-  startPluginsWithDelay, getIpAddress
+  startPluginsWithDelay, getIpAddress, isAdmin
 }

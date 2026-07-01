@@ -58,7 +58,7 @@ router.get('/', (req, res) => {
         });
     } else {
         res.render('index', {
-            isAdminAuthenticated: req.session.isAdminAuthenticated,
+            isAdminAuthenticated: helpers.isAdmin(req),
             isTuneAuthenticated: req.session.isTuneAuthenticated,
             tunerName: serverConfig.identification.tunerName,
             tunerDesc: helpers.parseMarkdown(serverConfig.identification.tunerDesc),
@@ -93,7 +93,7 @@ router.get('/audioonly', (req, res) => res.render('audioonly'))
 router.get('/wizard', (req, res) => {
     let serialPorts;
 
-    if(!req.session.isAdminAuthenticated) {
+    if(!helpers.isAdmin(req)) {
         res.render('login');
         return;
     }
@@ -106,7 +106,7 @@ router.get('/wizard', (req, res) => {
 
         parseAudioDevice((result) => {
             res.render('wizard', {
-                isAdminAuthenticated: req.session.isAdminAuthenticated,
+                isAdminAuthenticated: helpers.isAdmin(req),
                 videoDevices: result.audioDevices,
                 audioDevices: result.videoDevices,
                 serialPorts: serialPorts,
@@ -130,7 +130,7 @@ router.get('/setup', (req, res) => {
         return serverConfig;
     }
 
-    if(!req.session.isAdminAuthenticated) {
+    if(!helpers.isAdmin(req)) {
         res.render('login');
         return;
     }
@@ -147,7 +147,7 @@ router.get('/setup', (req, res) => {
 
             const updatedConfig = loadConfig();  // Reload the config every time
             res.render('setup', {
-                isAdminAuthenticated: req.session.isAdminAuthenticated,
+                isAdminAuthenticated: helpers.isAdmin(req),
                 videoDevices: result.audioDevices,
                 audioDevices: result.videoDevices,
                 serialPorts: serialPorts,
@@ -232,7 +232,7 @@ router.get('/logout', (req, res) => {
 
 router.get('/kick', (req, res) => {
     // Terminate the WebSocket connection for the specified IP address
-    if(req.session.isAdminAuthenticated) helpers.kickClient(req.query.ip);
+    if(helpers.isAdmin(req)) helpers.kickClient(req.query.ip);
     else {
         res.status(403);
         return;
@@ -241,7 +241,7 @@ router.get('/kick', (req, res) => {
 });
 
 router.get('/addToBanlist', (req, res) => {
-    if (!req.session.isAdminAuthenticated) {
+    if (!helpers.isAdmin(req)) {
         res.status(403);
         return;
     }
@@ -257,7 +257,7 @@ router.get('/addToBanlist', (req, res) => {
 });
 
 router.get('/removeFromBanlist', (req, res) => {
-    if (!req.session.isAdminAuthenticated) {
+    if (!helpers.isAdmin(req)) {
         res.status(403);
         return;
     }
@@ -279,7 +279,7 @@ router.get('/removeFromBanlist', (req, res) => {
 router.post('/saveData', (req, res) => {
     const data = req.body;
     let firstSetup;
-    if(req.session.isAdminAuthenticated || !configExists()) {
+    if(helpers.isAdmin(req) || !configExists()) {
         configUpdate(data);
         serverListUpdate.update();
 
@@ -293,7 +293,7 @@ router.post('/saveData', (req, res) => {
 router.get('/getData', (req, res) => {
     if (configExists() === false) res.json(serverConfig);
 
-    if(req.session.isAdminAuthenticated) {
+    if(helpers.isAdmin(req)) {
         // Check if the file exists
         fs.access(configPath, fs.constants.F_OK, (err) => {
             if (err) console.log(err);
@@ -306,7 +306,7 @@ router.get('/getData', (req, res) => {
 });
 
 router.get('/getDevices', (req, res) => {
-    if (req.session.isAdminAuthenticated || !fs.existsSync(configName + '.json')) parseAudioDevice(res.json);
+    if (helpers.isAdmin(req) || !fs.existsSync(configName + '.json')) parseAudioDevice(res.json);
     else res.status(403).json({ error: 'Unauthorized' });
 });
 

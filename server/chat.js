@@ -24,14 +24,14 @@ function createChatServer() {
         storage.chatHistory.forEach((message) => {
             const historyMessage = { ...message, history: true };
 
-            if (!request.session?.isAdminAuthenticated) delete historyMessage.ip;
+            if (!helpers.isAdmin(request)) delete historyMessage.ip;
             ws.send(JSON.stringify(historyMessage));
         });
 
         ws.send(JSON.stringify({
             type: 'clientIp',
             ip: clientIp,
-            admin: request.session?.isAdminAuthenticated
+            admin: helpers.isAdmin(request)
         }));
 
 
@@ -78,7 +78,7 @@ function createChatServer() {
                 return;
             }
 
-            if (request.session?.isAdminAuthenticated === true) messageData.admin = true;
+            if (helpers.isAdmin(request) === true) messageData.admin = true;
             if (messageData.nickname?.length > 32) messageData.nickname = messageData.nickname.substring(0, 32);
             if (messageData.message?.length > 255) messageData.message = messageData.message.substring(0, 255);
 
@@ -90,7 +90,7 @@ function createChatServer() {
             chatWss.clients.forEach((client) => {
                 if (client.readyState === WebSocket.OPEN) {
                     const responseMessage = { ...messageData };
-                    if (!request.session?.isAdminAuthenticated) delete responseMessage.ip;
+                    if (!helpers.isAdmin(request)) delete responseMessage.ip;
 
                     client.send(JSON.stringify(responseMessage));
                 }

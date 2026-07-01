@@ -1,6 +1,6 @@
 const { spawn } = require('child_process');
 
-function checkFFmpeg() {
+module.exports = function() {
   return new Promise((resolve, reject) => {
     const checkFFmpegProcess = spawn('ffmpeg', ['-version'], {
       stdio: ['ignore', 'ignore', 'ignore'],
@@ -16,5 +16,3 @@ function checkFFmpeg() {
     });
   });
 }
-
-module.exports = checkFFmpeg;

@@ -17,7 +17,6 @@ let serverConfig = {
   webserver: {
     webserverIp: "0.0.0.0",
     webserverPort: 8080,
-    pe5pvbXdrGtkPort: null,
     banlist: [],
     chatEnabled: true,
     tuningLimit: false,

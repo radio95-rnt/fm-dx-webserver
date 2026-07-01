@@ -1,4 +1,4 @@
-const tunerProfiles = [
+module.exports = [
   {
     id: 'tef',
     label: 'TEF668x',
@@ -76,5 +76,3 @@ const tunerProfiles = [
     ], details: ''
   }
 ];
-
-module.exports = tunerProfiles;

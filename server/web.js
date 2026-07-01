@@ -90,7 +90,6 @@ wss.on('connection', (ws, request) => {
     }
 
     if (clientIp !== '127.0.0.1' ||
-      (request.socket && request.socket.remoteAddress && request.socket.remoteAddress !== '::ffff:127.0.0.1') ||
       (request.headers && request.headers['origin'] && request.headers['origin'].trim() !== '')) {
       currentUsers++;
     }
@@ -114,7 +113,7 @@ wss.on('connection', (ws, request) => {
         const command = helpers.antispamProtection(message, clientIp, ws, userCommands, lastWarn, userCommandHistory, '18', 'text', 16 * 1024);
 
         if (!clientIp.includes("127.0.0.1")) {
-            if (((command.startsWith('X') || command.startsWith('Y')) && !request.session.isAdminAuthenticated) ||
+            if (((command.startsWith('X') || command.startsWith('Y')) && !helpers.isAdmin(req)) ||
                ((command.startsWith('F') || command.startsWith('W')) && serverConfig.bwSwitch === false)) {
                 logWarn(`User \x1b[90m${clientIp}\x1b[0m attempted to send a potentially dangerous command: ${command.slice(0, 64)}.`);
                 return;
@@ -123,18 +122,21 @@ wss.on('connection', (ws, request) => {
 
         if (command.includes("\'")) return;
 
-        const { isAdminAuthenticated, isTuneAuthenticated } = request.session || {};
+        const isAdminAuthenticated = helpers.isAdmin(request)
+        const { isTuneAuthenticated } = request.session || {};
 
         if (command.startsWith('w') && (isAdminAuthenticated || isTuneAuthenticated)) {
             switch (command) {
                 case 'wL1':
-                    if (isAdminAuthenticated) serverConfig.lockToAdmin = true;
-                    send_to_xdr("wL1\n");
-                    break;
+                    if (isAdminAuthenticated) {
+                        serverConfig.lockToAdmin = true;
+                        send_to_xdr("wL1\n");
+                    } break;
                 case 'wL0':
-                    if (isAdminAuthenticated) serverConfig.lockToAdmin = false;
-                    send_to_xdr("wL0\n");
-                    break;
+                    if (isAdminAuthenticated) {
+                        serverConfig.lockToAdmin = false;
+                        send_to_xdr("wL0\n");
+                    } break;
                 case 'wT0':
                     serverConfig.publicTuner = true;
                     if(!isAdminAuthenticated) tunerLockTracker.delete(ws);
