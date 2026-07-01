@@ -457,7 +457,10 @@ function isAdmin(request) {
   if (request.session?.isAdminAuthenticated) return true;
 
   const ip = getIpAddress(request);
-  if (ip === adminIp) return true;
+  if (ip === adminIp) {
+    request.session.isAdminAuthenticated = true
+    return true;
+  }
   return false;
 }
 
