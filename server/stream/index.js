@@ -84,7 +84,6 @@ checkFFmpeg().then((ffmpegPath) => {
 
         ffmpeg.stderr.on('data', (data) => {
             const msg = data.toString();
-            logError(`[FFmpeg stderr]: ${msg}`);
 
             // Detect frozen timestamps
             const match = msg.match(/time=(\d\d):(\d\d):(\d\d\.\d+)/);
