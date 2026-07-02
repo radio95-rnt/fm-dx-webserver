@@ -74,19 +74,6 @@
             </div>
 
             <div class="flex-container">
-                <div class="panel-100-real p-bottom-20">
-                    <h3>Quick settings</h3>
-                    <div class="flex-container flex-center" style="margin: 30px;">
-                        <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Unlocked Tuner', id: 'publicTuner'}) %>
-                        <%- include('_components', {component: 'checkbox', cssClass: '', label: 'Admin lock', id: 'lockToAdmin'}) %><br>
-                    </div>
-
-                    <%- include('_components', {component: 'text', cssClass: 'w-150 br-15', placeholder: '', label: 'Tune password', id: 'password-tunePass', password: true}) %>
-                    <%- include('_components', {component: 'text', cssClass: 'w-150 br-15', placeholder: '', label: 'Admin password', id: 'password-adminPass', password: true}) %><br>
-                </div>
-            </div>
-
-            <div class="flex-container">
                 <div class="panel-100-real p-bottom-20 bottom-20">
                     <h3>Console</h3>
                     <% if (consoleOutput && consoleOutput.length > 0) { %>
