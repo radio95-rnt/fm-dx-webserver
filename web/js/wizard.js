@@ -15,8 +15,6 @@ function updateWizardContent() {
 
     $('.btn-prev').toggle(visibleStepIndex !== 0);
     $('.btn-next').text(visibleStepIndex === 4 ? 'Save' : 'Next');
-
-    visibleStepIndex === 3 && mapReload(); // What is this? Javascript?
 }
 
 function navigateStep(isNext) {

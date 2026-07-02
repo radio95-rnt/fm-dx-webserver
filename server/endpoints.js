@@ -34,28 +34,7 @@ router.get('/', (req, res) => {
     const noPlugins = req.query.noPlugins === 'true';
 
     if (configExists() === false) {
-        let serialPorts;
-
-        SerialPort.list().then((deviceList) => {
-            serialPorts = deviceList.map(port => ({
-                path: port.path,
-                friendlyName: port.friendlyName,
-            }));
-
-            parseAudioDevice((result) => {
-                res.render('wizard', { // Magical utility wizard
-                    isAdminAuthenticated: true,
-                    videoDevices: result.audioDevices,
-                    audioDevices: result.videoDevices,
-                    serialPorts: serialPorts,
-                    tunerProfiles: tunerProfiles.map((profile) => ({
-                        id: profile.id,
-                        label: profile.label,
-                        detailsHtml: helpers.parseMarkdown(profile.details || '')
-                    }))
-                });
-            });
-        });
+        res.status(500).send("not configured");
     } else {
         res.render('index', {
             isAdminAuthenticated: helpers.isAdmin(req),
@@ -89,36 +68,6 @@ router.get('/403', (req, res) => {
 })
 
 router.get('/audioonly', (req, res) => res.render('audioonly'))
-
-router.get('/wizard', (req, res) => {
-    let serialPorts;
-
-    if(!helpers.isAdmin(req)) {
-        res.render('login');
-        return;
-    }
-
-    SerialPort.list().then((deviceList) => {
-        serialPorts = deviceList.map(port => ({
-            path: port.path,
-            friendlyName: port.friendlyName,
-        }));
-
-        parseAudioDevice((result) => {
-            res.render('wizard', {
-                isAdminAuthenticated: helpers.isAdmin(req),
-                videoDevices: result.audioDevices,
-                audioDevices: result.videoDevices,
-                serialPorts: serialPorts,
-                tunerProfiles: tunerProfiles.map((profile) => ({
-                    id: profile.id,
-                    label: profile.label,
-                    detailsHtml: helpers.parseMarkdown(profile.details || '')
-                }))
-            });
-        });
-    })
-})
 
 router.get('/setup', (req, res) => {
     let serialPorts;
