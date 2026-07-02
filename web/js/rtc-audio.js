@@ -3,6 +3,7 @@
  * FM-DX Webserver WHEP Audio Plugin
  * ************************************************
  * Created by techkrzysiek
+ * Stolen by me (thanks man)
  * ************************************************
  */
 
@@ -152,7 +153,7 @@ window.addEventListener('load', (() => {
         }
     }`;
 
-    let disable3las = false;
+    let disablews = false;
     let disableMobileSelect = true;
 
     let peerConnection = null;
@@ -231,7 +232,7 @@ window.addEventListener('load', (() => {
                 return;
             }
             const flags = await response.json();
-            disable3las = Boolean(flags.disable3las);
+            disablews = Boolean(flags.disablews);
         } catch (error) {
             console.warn('[WHEP] Failed to fetch flags:', error);
         }
@@ -243,8 +244,8 @@ window.addEventListener('load', (() => {
 
     function getCookieDomainAttribute() {
         const hostname = String(window.location.hostname || '').toLowerCase();
-        if (hostname === 'fmdx.pro' || hostname.endsWith('.fmdx.pro')) {
-            return '; domain=.fmdx.pro';
+        if (hostname === 'fmtuner.org' || hostname.endsWith('.fmtuner.org')) {
+            return '; domain=.fmtuner.org';
         }
         return '';
     }
@@ -616,7 +617,7 @@ window.addEventListener('load', (() => {
 
     function getDefaultSourceValue() {
         const storedValue = normalizeStoredSourceValue(getStoredSource());
-        if (storedValue === LEGACY_SOURCE_VALUE && !disable3las) {
+        if (storedValue === LEGACY_SOURCE_VALUE && !disablews) {
             return LEGACY_SOURCE_VALUE;
         }
 
@@ -636,7 +637,7 @@ window.addEventListener('load', (() => {
         const $selects = $(`.fmdx-webrtc-mode-select`);
         const buttonState = getActivePlaybackBackend() ? 'connected' : 'disconnected';
 
-        if (value === LEGACY_SOURCE_VALUE && !disable3las) {
+        if (value === LEGACY_SOURCE_VALUE && !disablews) {
             if (syncSelect) {
                 $selects.val(LEGACY_SOURCE_VALUE);
             }
@@ -745,7 +746,7 @@ window.addEventListener('load', (() => {
             });
         }
 
-        if (!disable3las) {
+        if (!disablews) {
             options.push({
                 value: LEGACY_SOURCE_VALUE,
                 label: getLegacyOptionLabel()

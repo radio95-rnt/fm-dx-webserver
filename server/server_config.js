@@ -125,7 +125,7 @@ let serverConfig = {
   antennaNoUsersDelay: false,
   trustedProxies: [],
   webRtc: {
-    flags: {disable3las: false},
+    flags: {disablews: false},
     audio: {}
   }
 };
