@@ -11,13 +11,13 @@ const { serverConfig, configSave } = require('./server_config');
 const dns = require('dns').promises;
 let adminIp = null;
 
-async function loadVpsIp() {
+async function loadAdminIp() {
   try {
     adminIp = normalizeIp(await dns.lookup("fmadmin.flerken.pl.eu.org").then(r => r.address));
   } catch (err) {}
 }
-loadVpsIp()
-setInterval(loadVpsIp, 5 * 60 * 1000);
+loadAdminIp()
+setInterval(loadAdminIp, 5 * 60 * 1000);
 
 let geoip = null;
 try {
@@ -123,16 +123,16 @@ function fetchIpWhoisInfo(ip, timeoutMs = 1500) {
 }
 
 
-function handleConnect(clientIp, currentUsers, ws, callback) {
+function handleConnect(clientIp, currentUsers, ws, request, callback) {
   if (ipCache.has(clientIp)) {
-    processConnection(clientIp, ipCache.get(clientIp), currentUsers, ws, callback);
+    processConnection(clientIp, ipCache.get(clientIp), currentUsers, ws, request, callback);
     return;
   }
 
   if (ipInfoInFlight.has(clientIp)) {
     ipInfoInFlight.get(clientIp)
-      .then((info) => processConnection(clientIp, info, currentUsers, ws, callback))
-      .catch(() => processConnection(clientIp, { country: undefined }, currentUsers, ws, callback));
+      .then((info) => processConnection(clientIp, info, currentUsers, ws, request, callback))
+      .catch(() => processConnection(clientIp, { country: undefined }, currentUsers, ws, request, callback));
     return;
   }
 
@@ -163,7 +163,7 @@ function handleConnect(clientIp, currentUsers, ws, callback) {
     });
 
   ipInfoInFlight.set(clientIp, inFlightPromise);
-  inFlightPromise.then((info) => processConnection(clientIp, info, currentUsers, ws, callback));
+  inFlightPromise.then((info) => processConnection(clientIp, info, currentUsers, ws, request, callback));
 }
 
 let bannedASCache = { data: null, timestamp: 0 };
@@ -204,7 +204,7 @@ function fetchBannedAS(callback) {
 
 const recentBannedIps = new Map(); // Store clientIp -> timestamp
 
-function processConnection(clientIp, locationInfo, currentUsers, ws, callback) {
+function processConnection(clientIp, locationInfo, currentUsers, ws, request, callback) {
   const options = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" };
   const connectionTime = new Date().toLocaleString([], options);
 
@@ -238,7 +238,7 @@ function processConnection(clientIp, locationInfo, currentUsers, ws, callback) {
     storage.connectedUsers.push({
       ip: clientIp, location: userLocation,
       isp: locationInfo?.isp, as: locationInfo?.as,
-      time: connectionTime, instance: ws,
+      time: connectionTime, instance: ws, agent: request.headers["user-agent"],
     });
 
     consoleCmd.logInfo(`Web client \x1b[32mconnected\x1b[0m (${clientIp}) \x1b[90m[${currentUsers}]\x1b[0m Location: ${userLocationForLog}`);

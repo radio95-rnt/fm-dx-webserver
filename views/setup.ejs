@@ -43,6 +43,7 @@
                             <tr>
                                 <th>IP Address</th>
                                 <th>Location</th>
+                                <th>User Agent</th>
                                 <th>Online since</th>
                                 <th></th>
                             </tr>
@@ -52,13 +53,14 @@
                                 <% connectedUsers.forEach(user => { %>
                                     <tr>
                                         <td>
-                                            <a href="https://ipinfo.io/<%= user.ip.replace('::ffff:', '') %>" target="_blank">
-                                                <%= user.ip.replace('::ffff:', '') %>
+                                            <a href="https://ipinfo.io/<%= user.ip %>" target="_blank">
+                                                <%= user.ip %>
                                             </a>
                                         </td>
                                         <td>
                                             <%= user.location %><% if (user.isp) { %> (<%= user.isp %>)<% } %>
                                         </td>
+                                        <td><%= user.agent %></td>
                                         <td><%= user.time %></td>
                                         <td><a href="./kick?ip=<%= user.ip %>">Kick</a></td>
                                     </tr>
