@@ -241,7 +241,7 @@ function processConnection(clientIp, locationInfo, currentUsers, ws, request, ca
       time: connectionTime, instance: ws, agent: request.headers["user-agent"],
     });
 
-    consoleCmd.logInfo(`Web client \x1b[32mconnected\x1b[0m (${clientIp}) \x1b[90m[${currentUsers}]\x1b[0m Location: ${userLocationForLog}`);
+    consoleCmd.logInfo(`Web client \x1b[32mconnected\x1b[0m (${clientIp}) \x1b[90m[${currentUsers}]\x1b[0m Location: ${userLocationForLog} | User Agent: ${request.headers["user-agent"]}`);
 
     callback("User allowed");
   });
