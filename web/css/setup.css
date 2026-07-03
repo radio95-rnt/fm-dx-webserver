@@ -101,15 +101,15 @@ li.active {
     height: 100%;
     z-index: 1000; /* Ensure it's above other content */
     transition: margin-left 0.3s ease; /* Smooth transition */
-  }
-  
-  .admin-wrapper {
-    transition: margin-left 0.3s ease, width 0.3s ease;
-  }
+}
 
-  .admin-wrapper > .panel-full > .panel-full {
+.admin-wrapper {
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+.admin-wrapper > .panel-full > .panel-full {
     min-height: 100vh;
-  }
+}
 
 #map {
     height:400px;
