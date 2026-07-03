@@ -252,7 +252,7 @@ pluginsWss.on('connection', (ws, request) => {
 
     ws.on('message', message => {
         // Anti-spam
-        const msg2 = helpers.antispamProtection(message, clientIp, ws, userCommands, lastWarn, userCommandHistory, '10', 'data_plugins');
+        const msg2 = helpers.antispamProtection(message, clientIp, ws, userCommands, lastWarn, userCommandHistory, '10', 'data_plugins', 1024 * 1024 * 2);
         if(!msg2) return;
 
         try {
