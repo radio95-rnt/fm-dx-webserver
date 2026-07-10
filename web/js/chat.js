@@ -24,7 +24,7 @@ $(document).ready(function() {
     }
 
     // Load nickname from localStorage on page load
-    let savedNickname = localStorage.getItem('nickname') || `User ${generateRandomString(5)}`;
+    let savedNickname = localStorage.getItem('nickname') || `User ${generateRandomString(6)}`;
     chatNicknameInput.val(savedNickname);
     chatIdentityNickname.text(savedNickname);
 
@@ -60,7 +60,7 @@ $(document).ready(function() {
 
     $('.chat-send-message-btn').click(sendMessage);
     chatNicknameSave.click(function() {
-        const currentNickname = chatNicknameInput.val().trim() || `Anonymous User ${generateRandomString(5)}`;
+        const currentNickname = chatNicknameInput.val().trim() || `Anonymous User ${generateRandomString(6)}`;
         localStorage.setItem('nickname', currentNickname);
         savedNickname = currentNickname;
         chatIdentityNickname.text(savedNickname);
@@ -87,7 +87,7 @@ $(document).ready(function() {
     });
 
     function sendMessage() {
-        const nickname = savedNickname || `Anonymous User ${generateRandomString(5)}`;
+        const nickname = savedNickname || `Anonymous User ${generateRandomString(6)}`;
         const message = chatSendInput.val().trim();
 
         if (message) {

@@ -25,12 +25,11 @@ const signalUnits = {
 };
 
 $(document).ready(() => {
-    
     getInitialSettings();
-    
+
     $('#login-form').submit(function (event) {
         event.preventDefault();
-        
+
         $.ajax({
             type: 'POST',
             url: './login',
@@ -45,11 +44,11 @@ $(document).ready(() => {
                 if (xhr.status === 403) sendToast('error', 'Login failed!', xhr.responseJSON.message, false, true);
             }
         });
-    });    
-    
+    });
+
     $('.logout-link').click(function (event) {
         event.preventDefault();
-        
+
         $.ajax({
             type: 'GET',  // Assuming the logout is a GET request, adjust accordingly
             url: './logout',
@@ -60,9 +59,7 @@ $(document).ready(() => {
                 }, 500);
             },
             error: function (xhr, status, error) {
-                if (xhr.status === 403) {
-                    sendToast('error', 'Logout failed!', xhr.responseJSON.message, false, true);
-                }
+                if (xhr.status === 403) sendToast('error', 'Logout failed!', xhr.responseJSON.message, false, true);
             }
         });
     });
@@ -132,7 +129,7 @@ function getInitialSettings() {
             ['qthLatitude', 'qthLongitude', 'defaultTheme', 'bgImage', 'rdsMode', 'rdsTimeout'].forEach(key => {
                 if (data[key] !== undefined) localStorage.setItem(key, data[key]);
             });
-            
+
             data.presets.forEach((preset, index) => localStorage.setItem(`preset${index + 1}`, preset));
 
             loadInitialSettings();
@@ -150,7 +147,7 @@ function loadInitialSettings() {
     const savedUnit = localStorage.getItem('signalUnit');
 
     themeSelector.find('input').val(themeSelector.find('.option[data-value="' + defaultTheme + '"]').text());
-    
+
     if(defaultTheme && themes[defaultTheme]) {
         setTheme(defaultTheme);
     }
@@ -160,12 +157,12 @@ function loadInitialSettings() {
         setTheme(themeParameter);
         themeSelector.find('input').val(themeSelector.find('.option[data-value="' + themeParameter + '"]').text());
     }
-    
+
     if (savedTheme && themes[savedTheme]) {
         setTheme(savedTheme);
         themeSelector.find('input').val(themeSelector.find('.option[data-value="' + savedTheme + '"]').text());
     }
-    
+
     themeSelector.on('click', '.option', (event) => {
         const selectedTheme = $(event.target).data('value');
         setTheme(selectedTheme);
@@ -173,15 +170,15 @@ function loadInitialSettings() {
         localStorage.setItem('theme', selectedTheme);
         setBg();
     });
-    
+
     const signalSelector = $('#signal-selector');
-    
+
     const signalParameter = getQueryParameter('signalUnits');
     if(signalParameter && !localStorage.getItem('signalUnit')) {
         signalSelector.find('input').val(signalSelector.find('.option[data-value="' + signalParameter + '"]').text());
         localStorage.setItem('signalUnit', signalParameter);
     } else signalSelector.find('input').val(signalSelector.find('.option[data-value="' + savedUnit + '"]').text());
-    
+
     signalSelector.on('click', '.option', (event) => {
         const selectedSignalUnit = $(event.target).data('value');
         signalSelector.find('input').val($(event.target).text()); // Set the text of the clicked option to the input
@@ -192,23 +189,23 @@ function loadInitialSettings() {
     if (extendedFreqRange === "true") {
         $("#extended-frequency-range").prop("checked", true);
     }
-    
+
     $("#extended-frequency-range").change(function() {
         var isChecked = $(this).is(":checked");
         localStorage.setItem("extendedFreqRange", isChecked);
     });
-    
+
     const psUnderscoreParameter = getQueryParameter('psUnderscores');
     if(psUnderscoreParameter) {
         $("#ps-underscores").prop("checked", JSON.parse(psUnderscoreParameter));
     }
-    
+
     var psUnderscores = localStorage.getItem("psUnderscores");
     if (psUnderscores) {
         $("#ps-underscores").prop("checked", JSON.parse(psUnderscores));
         localStorage.setItem("psUnderscores", psUnderscores);
     }
-    
+
     $("#ps-underscores").change(function() {
         var isChecked = $(this).is(":checked");
         localStorage.setItem("psUnderscores", isChecked);
@@ -219,13 +216,13 @@ function loadInitialSettings() {
         $("#imperial-units").prop("checked", JSON.parse(imperialUnits));
         localStorage.setItem("imperialUnits", imperialUnits);
     }
-    
+
     $("#imperial-units").change(function() {
         var isChecked = $(this).is(":checked");
         localStorage.setItem("imperialUnits", isChecked);
     });
-    
+
     $('.version-string').text(currentVersion);
-    
+
     setBg();
 }

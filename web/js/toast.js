@@ -43,11 +43,10 @@ function sendToast(type, title, message, persistent, important) {
 
 function closeToast($toast) {
     $toast.removeClass('show');
-    setTimeout(function () {
-        $toast.remove();
-    }, 300);
+    setTimeout(() => $toast.remove(), 300);
 }
 
 function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
+  // JS doesn't have a native capitilzation function? What the actual fuck in the toy language?
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }

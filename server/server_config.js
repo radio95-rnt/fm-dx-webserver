@@ -89,20 +89,6 @@ let serverConfig = {
   si47xx: {
     agcControl: false
   },
-  tunnel: {
-    enabled: false,
-    username: "",
-    token: "",
-    region: "eu",
-    lowLatencyMode: false,
-    subdomain: "",
-    httpName: "",
-    httpPassword: "",
-    community: {
-      enabled: false,
-      host: ""
-    }
-  },
   plugins: [],
   device: 'tef',
   defaultFreq: 87.5,

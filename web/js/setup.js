@@ -17,11 +17,10 @@ async function loadConsoleLogs() {
       html = stripAnsi(html);
 
       const logColors = {
-        INFO: "lime",
         DEBUG: "cyan",
-        CHAT: "cyan",
+        ERROR: "red",
+        INFO: "lime",
         WARN: "yellow",
-        ERROR: "red"
       };
 
       let firstBracketProcessed = false;

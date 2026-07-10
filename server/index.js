@@ -1,7 +1,3 @@
-const tunnel = require('./tunnel');
-tunnel.download();
-
-require('./stream/index');
 require("./device");
 
 const { serverConfig } = require('./server_config');
@@ -12,7 +8,7 @@ const { serverConfig } = require('./server_config');
   if (plugins.length > 0) setTimeout(helpers.startPluginsWithDelay, 3000, plugins, 3000);
 }
 
+require('./stream/index');
 require("./web")(serverConfig.webserver.webserverIp);
 
-tunnel.connect();
 require('./server_list')();

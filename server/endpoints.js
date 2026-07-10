@@ -6,8 +6,6 @@ const { SerialPort } = require('serialport')
 const path = require('path');
 const https = require('https');
 
-// File Imports
-const parseAudioDevice = require('./stream/parser');
 const { configName, serverConfig, configUpdate, configSave, configExists, configPath } = require('./server_config');
 const helpers = require('./helpers');
 const storage = require('./storage');
@@ -70,7 +68,11 @@ router.get('/403', (req, res) => {
 router.get('/audioonly', (req, res) => res.render('audioonly'))
 
 router.get('/setup', (req, res) => {
-    let serialPorts;
+    if(!helpers.isAdmin(req)) {
+        res.render('login');
+        return;
+    }
+
     function loadConfig() {
         if (fs.existsSync(configPath)) {
             const configFileContents = fs.readFileSync(configPath, 'utf8');
@@ -79,45 +81,17 @@ router.get('/setup', (req, res) => {
         return serverConfig;
     }
 
-    if(!helpers.isAdmin(req)) {
-        res.render('login');
-        return;
-    }
+    const processUptimeInSeconds = Math.floor(process.uptime());
+    const formattedProcessUptime = helpers.formatUptime(processUptimeInSeconds);
 
-    SerialPort.list().then((deviceList) => {
-        serialPorts = deviceList.map(port => ({
-            path: port.path,
-            friendlyName: port.friendlyName,
-        }));
-
-        parseAudioDevice((result) => {
-            const processUptimeInSeconds = Math.floor(process.uptime());
-            const formattedProcessUptime = helpers.formatUptime(processUptimeInSeconds);
-
-            const updatedConfig = loadConfig();  // Reload the config every time
-            res.render('setup', {
-                isAdminAuthenticated: helpers.isAdmin(req),
-                videoDevices: result.audioDevices,
-                audioDevices: result.videoDevices,
-                serialPorts: serialPorts,
-                memoryUsage: (process.memoryUsage.rss() / 1024 / 1024).toFixed(1) + ' MB',
-                memoryHeap: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1) + ' MB',
-                processUptime: formattedProcessUptime,
-                consoleOutput: logs,
-                plugins: require('./plugins'),
-                enabledPlugins: updatedConfig.plugins,
-                onlineUsers: dataHandler.dataToSend.users,
-                connectedUsers: storage.connectedUsers,
-                device: serverConfig.device,
-                banlist: updatedConfig.webserver.banlist, // Updated banlist from the latest config
-                tunerProfiles: tunerProfiles.map((profile) => ({
-                    id: profile.id,
-                    label: profile.label,
-                    detailsHtml: helpers.parseMarkdown(profile.details || '')
-                }))
-            });
-        });
-    })
+    const updatedConfig = loadConfig();  // Reload the config every time
+    res.render('setup', {
+        isAdminAuthenticated: true,
+        memoryUsage: (process.memoryUsage.rss() / 1024 / 1024).toFixed(1) + ' MB',
+        memoryHeap: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1) + ' MB',
+        processUptime: formattedProcessUptime,
+        consoleOutput: logs,
+    });
 });
 
 router.get('/api', (req, res) => {
@@ -254,11 +228,6 @@ router.get('/getData', (req, res) => {
     }
 });
 
-router.get('/getDevices', (req, res) => {
-    if (helpers.isAdmin(req) || !fs.existsSync(configName + '.json')) parseAudioDevice(res.json);
-    else res.status(403).json({ error: 'Unauthorized' });
-});
-
 /* Static data are being sent through here on connection - these don't change when the server is running */
 router.get('/static_data', (req, res) => {
     res.json({
@@ -381,25 +350,5 @@ router.get('/log_fmlist', (req, res) => {
     request.write(postData);
     request.end();
 });
-
-router.get('/tunnelservers', async (req, res) => {
-    const servers = [
-      { value: "eu", host: "eu.fmtuner.org", label: "Europe" },
-      { value: "us", host: "us.fmtuner.org", label: "Americas" },
-      { value: "sg", host: "sg.fmtuner.org", label: "Asia & Oceania" }
-    ];
-
-    const results = await Promise.all(
-      servers.map(async s => {
-        const latency = await helpers.checkLatency(s.host);
-        return {
-          value: s.value,
-          label: `${s.label} (${latency ? latency + ' ms' : 'offline'})` // From my tests, the latency via HTTP ping is roughly 2x higher than regular ping
-        };
-      })
-    );
-
-    res.json(results);
-  });
 
 module.exports = router;

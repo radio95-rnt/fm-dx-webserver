@@ -83,7 +83,6 @@ wss.on('connection', (ws, request) => {
     }
 
     if(currentUsers >= MAX_USERS) {
-        // TODO: give a nice fucking unwelcome message on the ui (we kindly ask you to FUCK OFF?)
         ws.send("a0"); // This means not authenticated in XDR
         ws.close(1008, 'Too many users using this server at the moment.');
         return;

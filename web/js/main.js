@@ -1,3 +1,6 @@
+const isMobileDevice = /android|iphone|ipod|ipad/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 var parsedData, signalChart, previousFreq;
 var data = [];
 var signalData = [];
@@ -110,7 +113,7 @@ $(document).ready(function () {
         }
 
         if (event.key === 'Enter') {
-            if (socket.readyState === WebSocket.OPEN) tuneTo(textInput.val());
+            tuneTo(textInput.val());
             textInput.val('');
         }
     });
@@ -126,10 +129,8 @@ $(document).ready(function () {
         e.preventDefault();
         const now = Date.now();
 
-        if (now - lastExecutionTime < throttleDelay) {
-            // Ignore this event as it's within the throttle delay
-            return;
-        }
+        // Ignore this event as it's within the throttle delay
+        if (now - lastExecutionTime < throttleDelay) return;
 
         lastExecutionTime = now; // Update the last execution time
 
@@ -362,9 +363,7 @@ function sendPingRequest() {
         socket.onopen = () => {
             sendToast('info', 'Connected', 'Reconnected successfully!', false, false);
         };
-        socket.onmessage = (event) => {
-            handleWebSocketMessage(event);
-        };
+        socket.onmessage = handleWebSocketMessage;
         socket.onerror = (error) => {
             console.error("Main/UI WebSocket error during reconnection:", error);
         };
@@ -390,11 +389,17 @@ function handleWebSocketMessage(event) {
     if (event.data == 'KICK') {
         console.log('Kick initiated.')
         setTimeout(() => {
-            window.location.href = '/403';
+            window.location.href = `/403?reason=${encodeURIComponent("You have been kicked")}`;
         }, 100);
         return;
     } else if (event.data.startsWith("!")) {
         sendToast('info', 'Info from server', event.data.slice(1), false, false)
+        return;
+    } else if( event.data == "a0") {
+        console.log('Too many users');
+        setTimeout(() => {
+            window.location.href = `/403?reason=${encodeURIComponent("Too many users")}`;
+        }, 100);
         return;
     }
 
@@ -404,11 +409,8 @@ function handleWebSocketMessage(event) {
     updatePanels(parsedData);
 
     const sum = signalData.reduce((acc, strNum) => acc + parseFloat(strNum), 0);
-    const averageSignal = sum / signalData.length;
-    data.push(averageSignal);
+    data.push(sum / signalData.length);
 }
-
-// Attach the message handler
 socket.onmessage = handleWebSocketMessage;
 
 const signalBuffer = [];
@@ -453,12 +455,12 @@ function initCanvas() {
                     grid: { display: false, borderWidth: 0, borderColor: "transparent" },
                     realtime: {
                         duration: 30000,
-                        refresh: 75,
+                        refresh: 100,
                         delay: 150,
-                        frameRate: 30, // default is 30
+                        frameRate: 24,
                         onRefresh: (chart) => {
                             if (!chart?.data?.datasets || parsedData?.sig === undefined) return;
-                            if ((isAndroid || isIOS || isIPadOS) && (document.hidden || !document.hasFocus())) return;
+                            if (isMobileDevice && (document.hidden || !document.hasFocus())) return;
 
                             const sig = parsedData.sig;
                             signalBuffer.push(sig);
@@ -572,18 +574,16 @@ function initCanvas() {
 }
 
 function setRefreshRate(rate) {
-    const rt = signalChart.options.scales.x.realtime;
-    rt.refresh = rate;
+    signalChart.options.scales.x.realtime.refresh = rate;
     signalChart.update('none');
-    console.log(`Graph refresh rate set to ${rate} ms`);
 }
 
 window.addEventListener("focus", () => {
-    if (isAndroid || isIOS || isIPadOS) setRefreshRate(75);
+    if(isMobileDevice) setRefreshRate(100);
 });
 
 window.addEventListener("blur", () => {
-    if (isAndroid || isIOS || isIPadOS) setRefreshRate(3000);
+    if(isMobileDevice) setRefreshRate(3000);
 });
 
 let reconnectTimer = null;
@@ -603,34 +603,10 @@ const resetDataTimeout = () => {
     }, TIMEOUT_DURATION);
 };
 
-socket.onmessage = (event) => {
-    if (event.data === 'KICK') {
-        console.log('Kick initiated.');
-        setTimeout(() => {
-            window.location.href = '/403';
-        }, 100);
-        return;
-    }
-
-    parsedData = JSON.parse(event.data);
-
-    resetDataTimeout();
-    updatePanels(parsedData);
-
-    const sum = signalData.reduce((acc, strNum) => acc + parseFloat(strNum), 0);
-    const averageSignal = sum / signalData.length;
-    data.push(averageSignal);
-};
-
-function compareNumbers(a, b) {
-    // Really?
-    return a - b;
-}
-
-function escapeHTML(unsafeText) {
-    let div = document.createElement('div');
-    div.innerText = unsafeText;
-    return div.innerHTML.replace(' ', '&nbsp;');
+function escapeHTML(text) {
+    const div = document.createElement("div");
+    div.innerText = text;
+    return div.innerHTML;
 }
 
 function processString(string, errors) {
@@ -650,90 +626,84 @@ function processString(string, errors) {
 }
 
 function checkKey(e) {
+    if (socket.readyState !== WebSocket.OPEN) return;
+    
     e = e || window.event;
-
-    if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) {
-        return;
-    }
+    if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return;
 
     if ($('#password:focus').length > 0
     || $('#chat-send-message:focus').length > 0
     || $('#volumeSlider:focus').length > 0
     || $('#chat-nickname:focus').length > 0
-    || $('.option:focus').length > 0) {
-        return;
-    }
+    || $('.option:focus').length > 0) return;
 
     getCurrentFreq();
 
-    if (socket.readyState === WebSocket.OPEN) {
-        switch (e.keyCode) {
-            case 66: // Back to previous frequency
-                tuneTo(previousFreq);
-                break;
-            case 82: // RDS Reset (R key)
-                tuneTo(Number(currentFreq));
-                break;
-            case 83: // Screenshot (S key)
-                break;
-            case 38:
-                socket.send("T" + (Math.round(currentFreq*1000) + ((currentFreq > 30) ? 10 : 1)));
-                break;
-            case 40:
-                socket.send("T" + (Math.round(currentFreq*1000) - ((currentFreq > 30) ? 10 : 1)));
-                break;
-            case 37:
-                tuneDown();
-                break;
-            case 39:
-                tuneUp();
-                break;
-            case 46:
-                let $dropdown = $(".data-ant");
-                let $input = $dropdown.find("input");
-                let $options = $dropdown.find("ul.options .option");
-
-                if ($options.length === 0) return; // No antennas available
-
-                // Find the currently selected antenna
-                let currentText = $input.val().trim();
-                let currentIndex = $options.index($options.filter(function () {
-                    return $(this).text().trim() === currentText;
-                }));
-
-                console.log(currentIndex, currentText);
-
-                // Cycle to the next option
-                let nextIndex = (currentIndex + 1) % $options.length;
-                let $nextOption = $options.eq(nextIndex);
-
-                // Update UI
-                $input.attr("placeholder", $nextOption.text());
-                $input.data("value", $nextOption.data("value"));
-
-                let socketMessage = "Z" + $nextOption.data("value");
-                socket.send(socketMessage);
-                break;
-            case 112: // F1
-                e.preventDefault();
-                tuneTo(Number(localStorage.getItem('preset1')));
-                break;
-            case 113: // F2
-                e.preventDefault();
-                tuneTo(Number(localStorage.getItem('preset2')));
-                break;
-            case 114: // F3
-                e.preventDefault();
-                tuneTo(Number(localStorage.getItem('preset3')));
-                break;
-            case 115: // F4
-                e.preventDefault();
-                tuneTo(Number(localStorage.getItem('preset4')));
-                break;
-            default:
-            // Handle default case if needed
+    switch (e.keyCode) {
+        case 66: // Back to previous frequency
+            tuneTo(previousFreq);
             break;
-        }
+        case 82: // RDS Reset (R key)
+            tuneTo(Number(currentFreq));
+            break;
+        case 83: // Screenshot (S key)
+            break;
+        case 38:
+            socket.send("T" + (Math.round(currentFreq*1000) + ((currentFreq > 30) ? 10 : 1)));
+            break;
+        case 40:
+            socket.send("T" + (Math.round(currentFreq*1000) - ((currentFreq > 30) ? 10 : 1)));
+            break;
+        case 37:
+            tuneDown();
+            break;
+        case 39:
+            tuneUp();
+            break;
+        case 46:
+            let $dropdown = $(".data-ant");
+            let $input = $dropdown.find("input");
+            let $options = $dropdown.find("ul.options .option");
+
+            if ($options.length === 0) return; // No antennas available
+
+            // Find the currently selected antenna
+            let currentText = $input.val().trim();
+            let currentIndex = $options.index($options.filter(function () {
+                return $(this).text().trim() === currentText;
+            }));
+
+            console.log(currentIndex, currentText);
+
+            // Cycle to the next option
+            let nextIndex = (currentIndex + 1) % $options.length;
+            let $nextOption = $options.eq(nextIndex);
+
+            // Update UI
+            $input.attr("placeholder", $nextOption.text());
+            $input.data("value", $nextOption.data("value"));
+
+            let socketMessage = "Z" + $nextOption.data("value");
+            socket.send(socketMessage);
+            break;
+        case 112: // F1
+            e.preventDefault();
+            tuneTo(Number(localStorage.getItem('preset1')));
+            break;
+        case 113: // F2
+            e.preventDefault();
+            tuneTo(Number(localStorage.getItem('preset2')));
+            break;
+        case 114: // F3
+            e.preventDefault();
+            tuneTo(Number(localStorage.getItem('preset3')));
+            break;
+        case 115: // F4
+            e.preventDefault();
+            tuneTo(Number(localStorage.getItem('preset4')));
+            break;
+        default:
+            break;
     }
 }
 
@@ -769,11 +739,8 @@ async function copyTx() {
 }
 
 async function copyRt() {
-    var rt0 = $('#data-rt0 span').text();
-    var rt1 = $('#data-rt1 span').text();
-
     try {
-        await copyToClipboard("[0] RT: " + rt0 + "\n[1] RT: " + rt1);
+        await copyToClipboard("[0] RT: " + $('#data-rt0 span').text() + "\n[1] RT: " + $('#data-rt1 span').text());
     } catch (error) {
         console.error(error);
     }
@@ -809,13 +776,10 @@ function copyToClipboard(textToCopy) {
 
 function findOnMaps() {
     var frequency = parseFloat($('#data-frequency').text());
-    var pi = $('#data-pi').text();
-    var latitude = localStorage.getItem('qthLongitude');
-    var longitude = localStorage.getItem('qthLatitude');
 
     frequency > 74 ? frequency = frequency.toFixed(1) : null;
 
-    window.open(`https://maps.fmdx.org/#qth=${longitude},${latitude}&freq=${frequency}&findPi=${pi}`, "_blank");
+    window.open(`https://maps.fmdx.org/#qth=${localStorage.getItem('qthLatitude')},${localStorage.getItem('qthLongitude')}&freq=${frequency}&findPi=${$('#data-pi').text()}`, "_blank");
 }
 
 function updateSignalUnits(parsedData, averageSignal) {
@@ -832,7 +796,7 @@ function updateSignalUnits(parsedData, averageSignal) {
             signalValue = currentSignal - 11.25;
             highestSignal = highestSignal - 11.25;
             signalText.text('dBµV');
-        break;
+            break;
         case 'dbm':
             signalValue = currentSignal - 120;
             highestSignal = highestSignal - 120;
@@ -1024,7 +988,7 @@ function updatePanels(parsedData) {
     const sum = signalData.reduce((acc, strNum) => acc + parseFloat(strNum), 0);
     const averageSignal = sum / signalData.length;
 
-    const sortedAf = parsedData.af.sort(compareNumbers);
+    const sortedAf = parsedData.af.sort(function (a, b){return a-b});
     const scaledArray = sortedAf.map(element => element / 1000);
 
     const listContainer = $('#af-list');
@@ -1048,8 +1012,7 @@ function updatePanels(parsedData) {
         // Add the event listener only once
         if (!isEventListenerAdded) {
             ul.on('click', 'a', function () {
-                const frequency = parseFloat($(this).text());
-                tuneTo(frequency);
+                tuneTo(parseFloat($(this).text()));
             });
             isEventListenerAdded = true;
         }

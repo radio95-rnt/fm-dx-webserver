@@ -7,7 +7,23 @@ if (!configExists() || !serverConfig.audio.audioDevice) return;
 
 const { spawn } = require('child_process');
 const { logDebug, logError, logInfo, logWarn } = require('../console');
-const checkFFmpeg = require('./checkFFmpeg');
+
+const checkFFmpeg = function() {
+  return new Promise((resolve, reject) => {
+    const checkFFmpegProcess = spawn('ffmpeg', ['-version'], {
+      stdio: ['ignore', 'ignore', 'ignore'],
+    });
+
+    checkFFmpegProcess.on('error', () => {
+      resolve(require('ffmpeg-static'));
+    });
+
+    checkFFmpegProcess.on('exit', (code) => {
+      if (code === 0) resolve('ffmpeg');
+      else resolve(require('ffmpeg-static'));
+    });
+  });
+}
 
 const consoleLogTitle = '[Audio Stream]';
 
@@ -24,8 +40,7 @@ checkFFmpeg().then((ffmpegPath) => {
     logInfo(`${consoleLogTitle} Using ${ffmpegPath === 'ffmpeg' ? 'system-installed FFmpeg' : 'ffmpeg-static'}`);
     logInfo(`${consoleLogTitle} Starting audio stream on device: \x1b[35m${serverConfig.audio.audioDevice}\x1b[0m`);
 
-    const sampleRate = Number(serverConfig.audio.sampleRate || 44100); // Maybe even do 32 khz, we do not need higher than 15 khz precision
-
+    const sampleRate = Number(serverConfig.audio.sampleRate || 32000);
     const channels = Number(serverConfig.audio.audioChannels || 2);
 
     let ffmpeg = null;
@@ -79,8 +94,6 @@ checkFFmpeg().then((ffmpegPath) => {
         ffmpeg = spawn(ffmpegPath, args, {stdio: ['ignore', 'pipe', 'pipe']});
 
         ffmpeg.stdout.pipe(audio_pipe, { end: false });
-
-        connectMessage(`${consoleLogTitle} Connected FFmpeg → MP3 → audioWss`);
 
         ffmpeg.stderr.on('data', (data) => {
             const msg = data.toString();
@@ -136,7 +149,6 @@ checkFFmpeg().then((ffmpegPath) => {
     });
 
     launchFFmpeg();
-
 }).catch((err) => {
     logError(`${consoleLogTitle} Error: ${err.message}`);
 });

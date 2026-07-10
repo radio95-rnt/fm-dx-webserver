@@ -22,10 +22,10 @@ window.addEventListener('load', (() => {
     const RECONNECT_DELAY = 3000;
     const FIRST_DISCONNECT_RECONNECT_DELAY = 500;
     const MAX_RECONNECT_ATTEMPTS = 50;
-    const UI_ATTACH_INITIAL_DELAY = 250;
+    const UI_ATTACH_INITIAL_DELAY = 100;
     const ONDEMAND_STARTUP_404_GRACE_ATTEMPTS = 5;
     const ONDEMAND_STARTUP_RECONNECT_MS_FAST = 500;
-    const ONDEMAND_STARTUP_RECONNECT_MS_SLOW = 1000;
+    const ONDEMAND_STARTUP_RECONNECT_MS_SLOW = 750;
     const ONDEMAND_STARTUP_FAST_RETRY_COUNT = 2;
 
     const webrtcCss = `
@@ -193,9 +193,7 @@ window.addEventListener('load', (() => {
     }
 
     function logWebRTCDebug(message, details = undefined) {
-        if (!DEBUG_WEBRTC_AUDIO) {
-            return;
-        }
+        if (!DEBUG_WEBRTC_AUDIO) return;
 
         const elapsedMs = currentDebugSessionStartedAt
             ? Math.round(performance.now() - currentDebugSessionStartedAt)
@@ -284,9 +282,7 @@ window.addEventListener('load', (() => {
     }
 
     function persistSelectedSource(value) {
-        if (value) {
-            setPersistentCookie(LAST_SOURCE_COOKIE_NAME, value);
-        }
+        if (value) setPersistentCookie(LAST_SOURCE_COOKIE_NAME, value);
     }
 
     function parseWhepProfiles(rawConfig) {
@@ -329,7 +325,7 @@ window.addEventListener('load', (() => {
     }
 
     function getLegacyOptionLabel() {
-        return '3LAS (TCP)';
+        return 'Websocket';
     }
 
     function getSelectedBitrateLabel() {
@@ -337,9 +333,7 @@ window.addEventListener('load', (() => {
     }
 
     function parseSelectedBitrate(value) {
-        if (typeof value !== 'string' || !value.startsWith('webrtc:')) {
-            return null;
-        }
+        if (typeof value !== 'string' || !value.startsWith('webrtc:')) return null;
 
         const bitrate = Number(value.slice('webrtc:'.length));
         return Number.isFinite(bitrate) && bitrate > 0 ? bitrate : null;
@@ -366,9 +360,7 @@ window.addEventListener('load', (() => {
     }
 
     function ensureAudioElement() {
-        if (audioElement) {
-            return audioElement;
-        }
+        if (audioElement) return audioElement;
 
         audioElement = new Audio();
         audioElement.autoplay = true;
@@ -393,9 +385,7 @@ window.addEventListener('load', (() => {
     }
 
     function maybeMarkAudioPlaybackStarted(source) {
-        if (!audioElement || hasAudioPlaybackStarted) {
-            return;
-        }
+        if (!audioElement || hasAudioPlaybackStarted) return;
 
         const currentTime = Number(audioElement.currentTime || 0);
         if (currentTime <= 0.05) {
@@ -441,9 +431,7 @@ window.addEventListener('load', (() => {
             isConnecting,
             audio: getAudioElementDebugState()
         });
-        if (!peerConnection || !isPeerConnectionReady || !hasAudioPlaybackStarted || isActive) {
-            return;
-        }
+        if (!peerConnection || !isPeerConnectionReady || !hasAudioPlaybackStarted || isActive) return;
 
         isConnecting = false;
         isActive = true;
@@ -482,22 +470,14 @@ window.addEventListener('load', (() => {
         const $managedButton = getManagedPlayButtons()
             .filter((_, element) => $(element).closest('#mobileTray').length > 0)
             .first();
-        if ($managedButton.length > 0) {
-            return $managedButton;
-        }
-
+        if ($managedButton.length > 0) return $managedButton;
         return $('#mobileTray .playbutton').first();
     }
 
     function ensureManagedDesktopPlayButton() {
         let $desktopButton = getDesktopPlayButton();
-        if ($desktopButton.length === 0) {
-            return $desktopButton;
-        }
-
-        if ($desktopButton.hasClass(MANAGED_PLAYBUTTON_CLASS)) {
-            return $desktopButton;
-        }
+        if ($desktopButton.length === 0) return $desktopButton;
+        if ($desktopButton.hasClass(MANAGED_PLAYBUTTON_CLASS)) return $desktopButton;
 
         const $proxyButton = $desktopButton;
         const $managedButton = $proxyButton.clone(false);
@@ -516,13 +496,8 @@ window.addEventListener('load', (() => {
 
     function ensureManagedMobilePlayButton() {
         let $mobileButton = getMobilePlayButton();
-        if ($mobileButton.length === 0) {
-            return $mobileButton;
-        }
-
-        if ($mobileButton.hasClass(MANAGED_PLAYBUTTON_CLASS)) {
-            return $mobileButton;
-        }
+        if ($mobileButton.length === 0) return $mobileButton;
+        if ($mobileButton.hasClass(MANAGED_PLAYBUTTON_CLASS)) return $mobileButton;
 
         $mobileButton.removeClass('playbutton').addClass(MANAGED_PLAYBUTTON_CLASS);
         $mobileButton.off();
@@ -536,9 +511,7 @@ window.addEventListener('load', (() => {
         }
 
         const $icon = $proxyButton.find('i');
-        if ($icon.hasClass('fa-stop')) {
-            return 'connected';
-        }
+        if ($icon.hasClass('fa-stop')) return 'connected';
         return 'disconnected';
     }
 
@@ -546,9 +519,7 @@ window.addEventListener('load', (() => {
         const legacyState = getLegacyProxyState();
         const $buttons = getManagedPlayButtons();
         $buttons.removeClass('rtc-active rtc-connecting');
-        if (legacyState === 'connected') {
-            $buttons.addClass('rtc-active');
-        }
+        if (legacyState === 'connected') $buttons.addClass('rtc-active');
         updatePlayButtonIcon(legacyState === 'connected' ? 'connected' : 'disconnected');
         updatePlayButtonTitle(legacyState === 'connected' ? 'connected' : 'disconnected');
     }
@@ -602,9 +573,7 @@ window.addEventListener('load', (() => {
     }
 
     function normalizeStoredSourceValue(value) {
-        if (value === LEGACY_SOURCE_VALUE) {
-            return value;
-        }
+        if (value === LEGACY_SOURCE_VALUE) return value;
 
         const storedBitrate = parseSelectedBitrate(value);
         if (storedBitrate) {
@@ -617,14 +586,10 @@ window.addEventListener('load', (() => {
 
     function getDefaultSourceValue() {
         const storedValue = normalizeStoredSourceValue(getStoredSource());
-        if (storedValue === LEGACY_SOURCE_VALUE && !disablews) {
-            return LEGACY_SOURCE_VALUE;
-        }
+        if (storedValue === LEGACY_SOURCE_VALUE && !disablews) return LEGACY_SOURCE_VALUE;
 
         const storedBitrate = parseSelectedBitrate(storedValue);
-        if (profiles.length === 0) {
-            return storedValue || SELECT_LOADING_VALUE;
-        }
+        if (profiles.length === 0) return storedValue || SELECT_LOADING_VALUE;
 
         const matchingProfile = Number.isFinite(storedBitrate)
             ? profiles.find((profile) => profile.bitrate === storedBitrate)
@@ -638,20 +603,14 @@ window.addEventListener('load', (() => {
         const buttonState = getActivePlaybackBackend() ? 'connected' : 'disconnected';
 
         if (value === LEGACY_SOURCE_VALUE && !disablews) {
-            if (syncSelect) {
-                $selects.val(LEGACY_SOURCE_VALUE);
-            }
-            if (persist) {
-                persistSelectedSource(LEGACY_SOURCE_VALUE);
-            }
+            if (syncSelect) $selects.val(LEGACY_SOURCE_VALUE);
+            if (persist) persistSelectedSource(LEGACY_SOURCE_VALUE);
             updatePlayButtonTitle(buttonState);
             return LEGACY_SOURCE_VALUE;
         }
 
         if (profiles.length === 0) {
-            if (syncSelect) {
-                $selects.val(SELECT_LOADING_VALUE);
-            }
+            if (syncSelect) $selects.val(SELECT_LOADING_VALUE);
             updatePlayButtonTitle(buttonState);
             return SELECT_LOADING_VALUE;
         }
@@ -665,12 +624,8 @@ window.addEventListener('load', (() => {
         persistSelectedBitrate();
 
         const appliedValue = `webrtc:${currentBitrate}`;
-        if (syncSelect) {
-            $selects.val(appliedValue);
-        }
-        if (persist) {
-            persistSelectedSource(appliedValue);
-        }
+        if (syncSelect) $selects.val(appliedValue);
+        if (persist) persistSelectedSource(appliedValue);
 
         updatePlayButtonTitle(buttonState);
         return appliedValue;
@@ -680,18 +635,14 @@ window.addEventListener('load', (() => {
         const $selects = $(`.fmdx-webrtc-mode-select`);
         for (let i = 0; i < $selects.length; i++) {
             const value = $selects[i].value;
-            if (value && value !== SELECT_LOADING_VALUE) {
-                return value;
-            }
+            if (value && value !== SELECT_LOADING_VALUE) return value;
         }
         return getDefaultSourceValue();
     }
 
     function getSelectedSourceLabel() {
         const selectedValue = getSelectedSourceValue();
-        if (selectedValue === LEGACY_SOURCE_VALUE) {
-            return getLegacyOptionLabel();
-        }
+        if (selectedValue === LEGACY_SOURCE_VALUE) return getLegacyOptionLabel();
 
         const selectedBitrate = parseSelectedBitrate(selectedValue) ?? currentBitrate;
         return selectedBitrate ? formatWebRtcOptionLabel(selectedBitrate) : 'WebRTC';
@@ -702,12 +653,8 @@ window.addEventListener('load', (() => {
     }
 
     function getActivePlaybackBackend() {
-        if (isConnecting || isActive || shouldReconnect) {
-            return 'webrtc';
-        }
-        if (isLegacyPlaybackActive()) {
-            return LEGACY_SOURCE_VALUE;
-        }
+        if (isConnecting || isActive || shouldReconnect) return 'webrtc';
+        if (isLegacyPlaybackActive()) return LEGACY_SOURCE_VALUE;
         return null;
     }
 
@@ -761,9 +708,7 @@ window.addEventListener('load', (() => {
     }
 
     function attachSelectToButton($button, selectId) {
-        if ($button.length === 0) {
-            return null;
-        }
+        if ($button.length === 0) return null;
 
         const $host = $button.closest('.panel-10').length > 0
             ? $button.closest('.panel-10')
@@ -803,13 +748,9 @@ window.addEventListener('load', (() => {
         const $desktopButton = ensureManagedDesktopPlayButton();
 
         let $mobileButton = $();
-        if (!disableMobileSelect) {
-            $mobileButton = ensureManagedMobilePlayButton();
-        }
+        if (!disableMobileSelect) $mobileButton = ensureManagedMobilePlayButton();
 
-        if ($desktopButton.length === 0 && $mobileButton.length === 0) {
-            return false;
-        }
+        if ($desktopButton.length === 0 && $mobileButton.length === 0) return false;
 
         const optionsHtml = buildOptionsHtml();
 
@@ -820,9 +761,7 @@ window.addEventListener('load', (() => {
 
         if (!disableMobileSelect) {
             const $mobileSelect = attachSelectToButton($mobileButton, SELECT_ID + '-mobile');
-            if ($mobileSelect) {
-                $mobileSelect.html(optionsHtml);
-            }
+            if ($mobileSelect) $mobileSelect.html(optionsHtml);
         }
 
         applySelectedSourceValue(getDefaultSourceValue(), { persist: false, syncSelect: true });
@@ -831,9 +770,7 @@ window.addEventListener('load', (() => {
 
     function bindPlayButtons() {
         const $buttons = getManagedPlayButtons();
-        if ($buttons.length === 0) {
-            return false;
-        }
+        if ($buttons.length === 0) return false;
 
         $buttons
             .off('click')
@@ -850,13 +787,9 @@ window.addEventListener('load', (() => {
         bindPlayButtons();
 
         const activeBackend = getActivePlaybackBackend();
-        if (activeBackend === 'webrtc') {
-            updateButtonState(isConnecting ? 'connecting' : 'connected');
-        } else if (!activeBackend) {
-            updateButtonState('disconnected');
-        } else {
-            syncManagedButtonWithLegacyState();
-        }
+        if (activeBackend === 'webrtc') updateButtonState(isConnecting ? 'connecting' : 'connected');
+        else if (!activeBackend) updateButtonState('disconnected');
+        else syncManagedButtonWithLegacyState();
     }
 
     async function fetchAvailableBitrates({ preserveSelection = true } = {}) {
@@ -955,21 +888,15 @@ window.addEventListener('load', (() => {
         if (audioElement) {
             audioElement.pause();
             audioElement.srcObject = null;
-            if (audioElement.parentNode) {
-                audioElement.parentNode.removeChild(audioElement);
-            }
+            if (audioElement.parentNode) audioElement.parentNode.removeChild(audioElement);
             audioElement = null;
         }
 
-        if (deleteSession) {
-            await deleteWhepSession();
-        }
+        if (deleteSession) await deleteWhepSession();
     }
 
     function scheduleReconnect({ countAttempt = true, delayMs = RECONNECT_DELAY } = {}) {
-        if (!shouldReconnect) {
-            return;
-        }
+        if (!shouldReconnect) return;
 
         if (countAttempt && reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
             sendToast('error', 'WebRTC Audio', 'Reconnect limit reached', false, false);
@@ -1015,11 +942,8 @@ window.addEventListener('load', (() => {
         isActive = false;
         await cleanupConnection();
 
-        if (wasRequested) {
-            scheduleReconnect();
-        } else {
-            updateButtonState('disconnected');
-        }
+        if (wasRequested) scheduleReconnect();
+        else updateButtonState('disconnected');
     }
 
     async function startWebRTC({ refreshProfiles = false } = {}) {
@@ -1103,9 +1027,7 @@ window.addEventListener('load', (() => {
             };
 
             pc.onconnectionstatechange = () => {
-                if (pc !== peerConnection) {
-                    return;
-                }
+                if (pc !== peerConnection) return;
 
                 logWebRTCDebug('pc.connectionstatechange', {
                     connectionState: pc.connectionState,
