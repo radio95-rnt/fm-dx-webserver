@@ -92,6 +92,7 @@ router.get('/setup', (req, res) => {
         processUptime: formattedProcessUptime,
         consoleOutput: logs,
         onlineUsers: dataHandler.dataToSend.users,
+        connectedUsers: storage.connectedUsers,
     });
 });
 
