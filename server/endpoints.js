@@ -91,6 +91,7 @@ router.get('/setup', (req, res) => {
         memoryHeap: (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1) + ' MB',
         processUptime: formattedProcessUptime,
         consoleOutput: logs,
+        onlineUsers: dataHandler.dataToSend.users,
     });
 });
 
