@@ -162,7 +162,9 @@ router.get('/kick', (req, res) => {
         res.status(403);
         return;
     }
-    setTimeout(res.redirect, 500, "/setup");
+    setTimeout(() => {
+        res.redirect("/setup");
+    }, 500);
 });
 
 router.get('/addToBanlist', (req, res) => {
