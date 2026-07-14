@@ -9,7 +9,6 @@ let lastReconnectAttempt = 0;
 let messageCounter = 0; // Count for WebSocket data length returning 0
 let messageData = 800; // Initial value anything above 0
 let messageLength = 800; // Retain value of messageData until value is updated
-let pingTimeLimit = false; // WebSocket becomes unresponsive with high ping
 
 const europe_programmes = [
     "No PTY", "News", "Current Affairs", "Info",
@@ -292,66 +291,10 @@ function getServerTime() {
 }
 
 function sendPingRequest() {
-    const timeoutDuration = 5000;
-    const startTime = new Date().getTime();
-
-    const fetchWithTimeout = (url, options, timeout = timeoutDuration) => {
-        return new Promise((resolve, reject) => {
-            const timerTimeout = setTimeout(() => {
-                reject(new Error('Request timed out'));
-            }, timeout);
-
-            fetch(url, options)
-            .then(response => {
-                clearTimeout(timerTimeout);
-                resolve(response);
-            })
-            .catch(error => {
-                clearTimeout(timerTimeout);
-                reject(error);
-            });
-        });
-    };
-
-    fetchWithTimeout('./ping', { cache: 'no-store' }, timeoutDuration)
-    .then(response => {
-        const endTime = new Date().getTime();
-        const pingTime = endTime - startTime;
-        $('#current-ping').text(`Ping: ${pingTime}ms`);
-        pingTimeLimit = false;
-    })
-    .catch(error => {
-        console.warn('Ping request failed');
-        $('#current-ping').text(`Ping: unknown`);
-        if (!pingTimeLimit) { // Force reconnection as WebSocket could be unresponsive even though it's reported as OPEN
-            if (messageLength === 0) window.socket.close(1000, 'Normal closure');
-            if (connectionLost) sendToast('warning', 'Connection lost', 'Attempting to reconnect...', false, false);
-            console.log("Reconnecting due to high ping...");
-            pingTimeLimit = true;
-        }
-    });
-
-    function handleMessage(message) {
-        messageData = JSON.parse(message.data.length);
-        socket.removeEventListener('message', handleMessage);
-    }
-    socket.addEventListener('message', handleMessage);
-    messageLength = messageData;
-    messageData = 0;
-
-    // Force reconnection if no WebSocket data after several queries
-    if (messageLength === 0) {
-        messageCounter++;
-        if (messageCounter === 5) {
-            messageCounter = 0;
-            window.socket.close(1000, 'Normal closure');
-            if (connectionLost) sendToast('warning', 'Connection lost', 'Attempting to reconnect...', false, false);
-            console.log("Reconnecting due to no data received...");
-        }
-    } else messageCounter = 0;
-
-    // Automatic reconnection on WebSocket close with cooldown
     const now = Date.now();
+
+    if (socket.readyState === WebSocket.OPEN) socket.send(`PING ${now}`);
+
     if (
         (socket.readyState === WebSocket.CLOSED || socket.readyState === WebSocket.CLOSING) &&
         (now - lastReconnectAttempt > TIMEOUT_DURATION)
@@ -371,35 +314,33 @@ function sendPingRequest() {
             console.warn("Main/UI WebSocket closed during reconnection. Will attempt to reconnect...");
         };
     }
-    if (connectionLost) {
-        if (dataTimeout == dataTimeoutPrevious) {
-            connectionLost = true;
-        } else {
-            setTimeout(() => {
-                window.socket.close(1000, 'Normal closure'); // Force reconnection to unfreeze browser UI
-            }, 8000); // Timeout must be higher than TIMEOUT_DURATION
-            connectionLost = false;
-            requiresAudioStreamRestart = true;
-            console.log("Radio data restored.");
-        }
-    }
 }
 
 function handleWebSocketMessage(event) {
     if (event.data == 'KICK') {
-        console.log('Kick initiated.')
+        console.log('Kick initiated.');
         setTimeout(() => {
             window.location.href = `/403?reason=${encodeURIComponent("You have been kicked")}`;
         }, 100);
         return;
-    } else if (event.data.startsWith("!")) {
-        sendToast('info', 'Info from server', event.data.slice(1), false, false)
+    }
+    if (event.data.startsWith("!")) {
+        sendToast('info', 'Info from server', event.data.slice(1), false, false);
         return;
-    } else if( event.data == "a0") {
+    }
+    if (event.data == "a0") {
         console.log('Too many users');
         setTimeout(() => {
             window.location.href = `/403?reason=${encodeURIComponent("Too many users")}`;
         }, 100);
+        return;
+    }
+    if (event.data.startsWith("PING ")) {
+        const sentTime = Number(event.data.substring(5));
+        const ping = Date.now() - sentTime;
+
+        $('#current-ping').text(`Ping: ${ping}ms`);
+
         return;
     }
 
@@ -411,7 +352,6 @@ function handleWebSocketMessage(event) {
     const sum = signalData.reduce((acc, strNum) => acc + parseFloat(strNum), 0);
     data.push(sum / signalData.length);
 }
-socket.onmessage = handleWebSocketMessage;
 
 const signalBuffer = [];
 
