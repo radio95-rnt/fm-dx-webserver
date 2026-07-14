@@ -17,9 +17,9 @@ if (!window.socket || window.socket.readyState === WebSocket.CLOSED || window.so
             reject(error);
         });
 
-        socket.addEventListener('close', () => {
+        socket.addEventListener('close', (event) => {
             setTimeout(() => {
-                console.warn('WebSocket connection closed');
+                console.warn(`WebSocket connection closed (${event.code} '${event.reason}' ${event.wasClean})`);
             }, 100);
             reject(new Error('WebSocket connection closed'));
         });
