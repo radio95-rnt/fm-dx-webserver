@@ -352,6 +352,7 @@ function handleWebSocketMessage(event) {
     const sum = signalData.reduce((acc, strNum) => acc + parseFloat(strNum), 0);
     data.push(sum / signalData.length);
 }
+socket.onmessage = handleWebSocketMessage;
 
 const signalBuffer = [];
 
