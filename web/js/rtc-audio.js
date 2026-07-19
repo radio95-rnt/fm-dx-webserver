@@ -242,9 +242,9 @@ window.addEventListener('load', (() => {
 
     function getCookieDomainAttribute() {
         const hostname = String(window.location.hostname || '').toLowerCase();
-        if (hostname === 'fmtuner.org' || hostname.endsWith('.fmtuner.org')) {
-            return '; domain=.fmtuner.org';
-        }
+        // if (hostname === 'fmtuner.org' || hostname.endsWith('.fmtuner.org')) {
+        //     return '; domain=.fmtuner.org';
+        // }
         return '';
     }
 
