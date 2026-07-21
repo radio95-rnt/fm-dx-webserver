@@ -150,8 +150,6 @@ $(document).ready(function () {
         return false;
     });
 
-    setInterval(getServerTime, 10000);
-    getServerTime();
     setInterval(sendPingRequest, 5000);
     sendPingRequest();
 
@@ -259,37 +257,6 @@ $(document).ready(function () {
     initTooltips();
 });
 
-function getServerTime() {
-    $.ajax({
-        url: "./server_time",
-        dataType: "json",
-        success: function(data) {
-            const serverTimeUtc = data.serverTime;
-
-            const options = {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            };
-
-            const serverOptions = {
-                ...options,
-                timeZone: 'Etc/UTC'
-            };
-
-            const formattedServerTime = new Date(serverTimeUtc).toLocaleString(navigator.language ? navigator.language : 'en-US', serverOptions);
-
-            $("#server-time").text(formattedServerTime);
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-            console.error("Error fetching server time:", errorThrown);
-        }
-    });
-}
-
 function sendPingRequest() {
     const now = Date.now();
 
@@ -349,8 +316,21 @@ function handleWebSocketMessage(event) {
     resetDataTimeout();
     updatePanels(parsedData);
 
-    const sum = signalData.reduce((acc, strNum) => acc + parseFloat(strNum), 0);
-    data.push(sum / signalData.length);
+    data.push(signalData.reduce((acc, strNum) => acc + parseFloat(strNum), 0) / signalData.length);
+
+    if(parsedData.timestamp) {
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Etc/UTC'
+        };
+        const formattedServerTime = new Date(parsedData.timestamp * 1000).toLocaleString(navigator.language ? navigator.language : 'en-US', options);
+        $("#server-time").text(formattedServerTime);
+    }
 }
 socket.onmessage = handleWebSocketMessage;
 

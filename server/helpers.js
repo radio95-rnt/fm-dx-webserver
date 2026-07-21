@@ -280,19 +280,19 @@ function resolveDataBuffer(data) {
 
   if (receivedData.length) dataHandler.handleData(wss, receivedData, rdsWss);
 }
-
 function kickClient(ipAddress) {
-  // Find the entry in connectedClients associated with the provided IP address
   const targetClient = storage.connectedUsers.find(client => client.ip === ipAddress);
   if (targetClient && targetClient.instance) {
-    // Send a termination message to the client
     targetClient.instance.send('KICK');
 
-    // Close the WebSocket connection after a short delay to allow the client to receive the message
     setTimeout(() => {
       targetClient.instance.close();
+
+      const index = storage.connectedUsers.indexOf(targetClient);
+      if (index !== -1) storage.connectedUsers.splice(index, 1);
+
       consoleCmd.logInfo(`Web client kicked (${ipAddress})`);
-    }, 500);
+    }, 750);
   } else consoleCmd.logInfo(`Kicking client ${ipAddress} failed. No suitable client found.`);
 }
 

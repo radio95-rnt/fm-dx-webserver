@@ -229,7 +229,7 @@ function handleData(wss, receivedData, rdsWss) {
   }).catch((error) => console.log("Error fetching Tx info:", error));
 
   // Send the updated data to the client
-  const dataToSendJSON = JSON.stringify(dataToSend);
+  const dataToSendJSON = JSON.stringify({...dataToSend, timestamp: Math.floor(Date.now() / 1000)});
   if (currentTime - lastUpdateTime >= updateInterval) {
     wss.clients.forEach((client) => client.send(dataToSendJSON));
     lastUpdateTime = Date.now();

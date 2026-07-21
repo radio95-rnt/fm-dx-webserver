@@ -66,20 +66,17 @@ wss.on('connection', (ws, request) => {
 
     // Per-IP limit connection open
     if (clientIp) {
-        const isLocalIp = (clientIp === '127.0.0.1' || clientIp === '::1' || clientIp.startsWith('192.168.') || clientIp.startsWith('10.') || clientIp.startsWith('172.16.'));
-        if (!isLocalIp) {
-            if (!ipConnectionCounts.has(clientIp)) ipConnectionCounts.set(clientIp, 0);
-            const currentCount = ipConnectionCounts.get(clientIp);
-            if (currentCount >= MAX_CONNECTIONS_PER_IP) {
-                ws.close(1008, 'Too many open connections from this IP');
-                const lastLogTime = ipLogTimestamps.get(clientIp) || 0;
-                const now = Date.now();
-                if (now - lastLogTime > IP_LOG_INTERVAL_MS) {
-                    logWarn(`Web client \x1b[31mclosed: limit exceeded\x1b[0m (${clientIp}) \x1b[90m[${currentUsers}]`);
-                    ipLogTimestamps.set(clientIp, now);
-                } return;
-            } ipConnectionCounts.set(clientIp, currentCount + 1);
-        }
+        if (!ipConnectionCounts.has(clientIp)) ipConnectionCounts.set(clientIp, 0);
+        const currentCount = ipConnectionCounts.get(clientIp);
+        if (currentCount >= MAX_CONNECTIONS_PER_IP) {
+            ws.close(1008, 'Too many open connections from this IP');
+            const lastLogTime = ipLogTimestamps.get(clientIp) || 0;
+            const now = Date.now();
+            if (now - lastLogTime > IP_LOG_INTERVAL_MS) {
+                logWarn(`Web client \x1b[31mclosed: limit exceeded\x1b[0m (${clientIp}) \x1b[90m[${currentUsers}]`);
+                ipLogTimestamps.set(clientIp, now);
+            } return;
+        } ipConnectionCounts.set(clientIp, currentCount + 1);
     }
 
     if(currentUsers >= MAX_USERS) {
@@ -88,10 +85,7 @@ wss.on('connection', (ws, request) => {
         return;
     }
 
-    if (clientIp !== '127.0.0.1' ||
-      (request.headers && request.headers['origin'] && request.headers['origin'].trim() !== '')) {
-      currentUsers++;
-    }
+    if (clientIp !== '127.0.0.1') currentUsers++;
 
     if (timeoutAntenna) clearTimeout(timeoutAntenna);
 
@@ -170,24 +164,12 @@ wss.on('connection', (ws, request) => {
     ws.on('close', (code) => {
       // Per-IP limit connection closed
       if (clientIp) {
-        const isLocalIp = (
-          clientIp === '127.0.0.1' ||
-          clientIp === '::1' ||
-          clientIp.startsWith('192.168.') ||
-          clientIp.startsWith('10.') ||
-          clientIp.startsWith('172.16.')
-        );
-        if (!isLocalIp) {
-          const current = ipConnectionCounts.get(clientIp) || 1;
-          ipConnectionCounts.set(clientIp, Math.max(0, current - 1));
-        }
+        const current = ipConnectionCounts.get(clientIp) || 1;
+        ipConnectionCounts.set(clientIp, Math.max(0, current - 1));
       }
 
-      if (clientIp !== '127.0.0.1' ||
-        (request.socket && request.socket.remoteAddress && request.socket.remoteAddress !== '::ffff:127.0.0.1') ||
-        (request.headers && request.headers['origin'] && request.headers['origin'].trim() !== '')) {
-        currentUsers--;
-      } dataHandler.showOnlineUsers(currentUsers);
+      if (clientIp !== '127.0.0.1') currentUsers--;
+      dataHandler.showOnlineUsers(currentUsers);
 
       const index = storage.connectedUsers.findIndex(user => user.ip === clientIp);
       if (index !== -1) storage.connectedUsers.splice(index, 1);
