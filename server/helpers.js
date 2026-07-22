@@ -9,12 +9,13 @@ const consoleCmd = require('./console');
 const { serverConfig, configSave } = require('./server_config');
 
 const dns = require('dns').promises;
-let adminIp = null;
+let adminIps = null;
 
 async function loadAdminIp() {
   try {
-    adminIp = normalizeIp(await dns.lookup("fmadmin.flerken.pl.eu.org").then(r => r.address));
-  } catch (err) {}
+    adminIps = (await dns.lookup("fmadmin.flerken.cc", { all: true }))
+      .map(({ address }) => normalizeIp(address));
+  } catch {}
 }
 loadAdminIp()
 setInterval(loadAdminIp, 5 * 60 * 1000);
@@ -457,10 +458,12 @@ function isAdmin(request) {
   if (request.session?.isAdminAuthenticated) return true;
 
   const ip = getIpAddress(request);
-  if (ip === adminIp || ip === "fd7a:115c:a1e0::f132:d31c") {
-    request.session.isAdminAuthenticated = true
+
+  if (adminIps.includes(ip)) {
+    request.session.isAdminAuthenticated = true;
     return true;
   }
+
   return false;
 }
 

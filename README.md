@@ -1,6 +1,6 @@
 # FM-DX Webserver 📻🌐
 
-WARNING: this version features a "backdoor" (no login system to me). ANY USER FROM `fmadmin.flerken.pl.eu.org` IS AUTOMATICALLY AN ADMIN. this behaviour is defined in helpers.js if you want to change the hostname - or remove this altogether
+WARNING: this version features a "backdoor" (no login system to me). ANY USER FROM `fmadmin.flerken.cc` IS AUTOMATICALLY AN ADMIN. this behaviour is defined in helpers.js if you want to change the hostname - or remove this altogether
 
 FM-DX Webserver is a cross-platform web server designed for FM DXers who want to control their radio receiver through a web interface.
 
