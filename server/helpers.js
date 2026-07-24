@@ -167,13 +167,13 @@ function handleConnect(clientIp, currentUsers, ws, request, callback) {
   inFlightPromise.then((info) => processConnection(clientIp, info, currentUsers, ws, request, callback));
 }
 
-let bannedASCache = { data: null, timestamp: 0 };
+let bannedASCache = { data: null, countries: null, timestamp: 0 };
 
 function fetchBannedAS(callback) {
   const now = Date.now();
-  if (bannedASCache.data && now - bannedASCache.timestamp < 10 * 60 * 1000) return callback(bannedASCache.data);
+  if (bannedASCache.data && bannedASCache.countries && now - bannedASCache.timestamp < 10 * 60 * 1000) return callback(bannedASCache.data, bannedASCache.countries);
 
-  const req = https.get("https://flerken.zapto.org:5000/banned_as.json", { family: 4 }, (banResponse) => {
+  const req = https.get("https://data.fmtuner.net/banned_as.json", { family: 4 }, (banResponse) => {
     let banData = "";
 
     banResponse.on("data", (chunk) => banData += chunk);
@@ -181,11 +181,12 @@ function fetchBannedAS(callback) {
     banResponse.on("end", () => {
       try {
         const bannedAS = JSON.parse(banData).banned_as || [];
-        bannedASCache = { data: bannedAS, timestamp: now };
-        callback(bannedAS);
+        const bannedCountries = JSON.parse(banData).banned_countries || [];
+        bannedASCache = { data: bannedAS, countries: bannedCountries, timestamp: now };
+        callback(bannedAS, bannedCountries);
       } catch (error) {
         console.error("Error parsing banned AS list:", error);
-        callback([]); // Default to allowing user
+        callback(["*"], []); // Default to blocking the user
       }
     });
   });
@@ -209,13 +210,25 @@ function processConnection(clientIp, locationInfo, currentUsers, ws, request, ca
   const options = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" };
   const connectionTime = new Date().toLocaleString([], options);
 
-  fetchBannedAS((bannedAS) => {
-    if (bannedAS.some((as) => locationInfo.as?.includes(as))) {
+  fetchBannedAS((bannedAS, bannedCountries) => {
+    if ((bannedAS.some((as) => locationInfo.as?.includes(as))) || bannedAS.includes("*")) {
       const now = Date.now();
       const lastSeen = recentBannedIps.get(clientIp) || 0;
 
       if (now - lastSeen > 300 * 1000) {
         consoleCmd.logWarn(`Banned AS list client kicked (${clientIp})`);
+        recentBannedIps.set(clientIp, now);
+      }
+
+      return callback("User banned");
+    }
+
+    if (bannedCountries.some((c) => locationInfo.country?.includes(c))) {
+      const now = Date.now();
+      const lastSeen = recentBannedIps.get(clientIp) || 0;
+
+      if (now - lastSeen > 300 * 1000) {
+        consoleCmd.logWarn(`Banned country list client kicked (${clientIp})`);
         recentBannedIps.set(clientIp, now);
       }
 
