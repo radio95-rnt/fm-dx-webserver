@@ -6,6 +6,7 @@
   <link href="css/flags.min.css" type="text/css" rel="stylesheet">
   <link href="css/libs/fontawesome.css" type="text/css" rel="stylesheet">
   <link href="css/libs/jquery-ui.min.css" type="text/css" rel="stylesheet">
+  <link href="css/enchanced_tuning.css" type="text/css" rel="stylesheet">
   <!--<link href="css/libs/jquery-ui.theme.min.css" type="text/css" rel="stylesheet">-->
   <script src="js/libs/jquery.min.js"></script>
   <script src="js/libs/jquery-ui.min.js"></script>
@@ -25,12 +26,12 @@
   <!-- Audio streaming -->
   <script src="js/audio/mp3_player.js"></script>
   <script src="js/audio/main.js"></script>
-  <script src="js/rtc-audio.js"></script>
   <script type="text/javascript">
     window.addEventListener('load', Init, false);
-    document.ontouchmove = function(e) {
+    document.ontouchmove = function(e) { // Why?
       e.preventDefault();
     }
+  <script src="js/rtc-audio.js"></script>
   </script>
 </head>
 
@@ -559,6 +560,7 @@
   <div id="toast-container" aria-live="polite"></div>
   <script src="js/websocket.js"></script>
   <script src="js/webserver.js"></script>
+  <script src="js/enchanced_tuning.js"></script>
   <% if (!noPlugins) { %>
   <% plugins?.forEach(function(plugin) { %>
   <script src="js/plugins/<%= plugin %>"></script>

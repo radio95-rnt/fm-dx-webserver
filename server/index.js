@@ -9,6 +9,8 @@ const { serverConfig } = require('./server_config');
 }
 
 require('./stream/index');
-require("./web")(serverConfig.webserver.webserverIp);
+const start = require("./web");
+require("./enchanced_tuning");
+start(serverConfig.webserver.webserverIp);
 
 require('./server_list')();

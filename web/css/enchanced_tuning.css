@@ -1,0 +1,563 @@
+/* A1: Styles for Tune Step Feature */
+body.tune-step-enabled #freq-container {
+    cursor: pointer;
+	user-select: none;
+    -webkit-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+}
+body.tune-step-enabled .freq-digit-marker {
+    color: #00FF00;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.et-dimmed-zero {
+    opacity: 0.1;
+}
+.et-dimmed-zero.freq-digit-marker {
+    opacity: 0.9;
+}
+
+/* A2: Styles for disabled bands (Tune Limit) */
+.disabled-band {
+    background-color: var(--color-1) !important;
+    color: var(--color-3) !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+/* MW 9 kHz/10 kHz button */
+#mw-step-toggle-button {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  z-index: 11;
+  display: none;
+  max-width: 50px; 
+  text-align: center;
+  height: auto;
+  padding: 1px 6px;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.4;
+  color: var(--color-main);
+  background-color: var(--color-4);
+  border: 1px solid var(--color-2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s ease, background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+#mw-step-toggle-button:hover {
+  background-color: var(--color-5);
+  transform: translateY(-1px);
+}
+
+#mw-step-toggle-button.active {
+  opacity: 1;
+  border-color: var(--color-4);
+}
+
+
+/* ========================================================================== */
+/* B: MODERN LAYOUT */
+/* ========================================================================== */
+
+/* B1: Basic structure for Modern Layout */
+body.layout-modern #freq-container {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* B2: Main wrapper and buttons (Shown only if HIDE_ALL_BUTTONS is false) */
+body.layout-modern.modern-buttons-visible .band-selector-layout-wrapper {
+    display: flex;
+    gap: 15px;
+    margin: 20px 10px 0 10px;
+    background: transparent !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+}
+body.layout-modern.modern-buttons-visible .side-band-button-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 60px;
+    flex-shrink: 0;
+}
+body.layout-modern.modern-buttons-visible .band-selector-button {
+    height: 28px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    background-color: color-mix(in srgb, var(--color-4) 60%, transparent);
+    color: var(--color-main);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+body.layout-modern.modern-buttons-visible .band-selector-button:hover {
+    background-color: var(--color-5);
+    color: var(--color-main);
+}
+body.layout-modern.modern-buttons-visible .side-band-button-container .band-selector-button.active-band {
+    background-color: var(--color-4);
+    color: var(--color-main);
+}
+body.layout-modern.modern-buttons-visible #rt-container,
+body.layout-modern.modern-buttons-visible .am-bands-view-container {
+    flex-grow: 1;
+    min-width: 0;
+    background-color: var(--color-1-transparent);
+    backdrop-filter: blur(5px);
+    border-radius: 15px;
+    margin: 0 !important;
+    height: auto !important;
+    align-self: stretch;
+}
+body.layout-modern.modern-buttons-visible .am-bands-view-container {
+    display: grid;
+    grid-template-columns: 85px 1fr;
+    gap: 5px;
+    padding: 0 5px;
+}
+body.layout-modern.modern-buttons-visible .sw-grid-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 5px;
+    height: 100%;
+}
+body.layout-modern.modern-buttons-visible .am-view-button,
+body.layout-modern.modern-buttons-visible .sw-grid-button {
+    border: none;
+    border-radius: 8px;
+    background-color: var(--color-3);
+    color: var(--color-main);
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease-in-out;
+}
+body.layout-modern.modern-buttons-visible .am-view-button:hover,
+body.layout-modern.modern-buttons-visible .sw-grid-button:hover {
+    background-color: var(--color-4);
+}
+body.layout-modern.modern-buttons-visible .am-bands-view-container .am-view-button.active-band,
+body.layout-modern.modern-buttons-visible .am-bands-view-container .sw-grid-button.active-band {
+    background-color: var(--color-5);
+    color: var(--color-main);
+}
+body.layout-modern.modern-buttons-visible .am-view-button {
+    font-size: 14px;
+    height: 22px;
+    width: 60px;
+}
+body.layout-modern.modern-buttons-visible .sw-bands-fieldset,
+body.layout-modern.modern-buttons-visible .band-fieldset {
+    border: 1px solid var(--color-3);
+    border-bottom: none;
+    border-radius: 8px;
+    padding: 0px 5px 5px 5px;
+    margin: 0;
+    position: relative;
+}
+body.layout-modern.modern-buttons-visible .sw-bands-fieldset legend,
+body.layout-modern.modern-buttons-visible .band-fieldset legend {
+    color: var(--color-4);
+    font-weight: bold;
+    font-size: 11px;
+    width: auto;
+    margin: 0 auto;
+    padding: 0;
+}
+body.layout-modern.modern-buttons-visible .band-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding-top: 3px;
+    height: 100%;
+    box-sizing: border-box;
+}
+body.layout-modern.modern-buttons-visible .band-selector-layout-wrapper .tooltip,
+body.layout-modern.modern-buttons-visible .band-selector-layout-wrapper .bs-tooltip {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+}
+body.layout-modern.modern-buttons-visible .band-selector-layout-wrapper .bs-tooltip {
+    line-height: 0;
+}
+body.layout-modern.modern-buttons-visible .band-selector-layout-wrapper .bs-tooltiptext {
+    visibility: hidden;
+    width: 180px;
+    position: absolute;
+    background-color: var(--color-2);
+    border: 2px solid var(--color-3);
+    color: var(--color-text);
+    text-align: center;
+    font-size: 14px;
+    border-radius: 15px;
+    padding: 8px;
+    z-index: 1000;
+    bottom: 110%;
+    left: 50%;
+    margin-left: -90px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    line-height: normal;
+}
+body.layout-modern.modern-buttons-visible .band-selector-layout-wrapper .bs-tooltip:hover .bs-tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* B3: Loop button and frequency range for Modern Layout */
+body.layout-modern.loop-button-visible .loop-toggle-button {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    z-index: 5;
+    width: 34px;
+    height: auto;
+    min-height: 22px;
+    line-height: 1.2;
+    font-size: 11px;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--color-3);
+    color: var(--color-main);
+    cursor: pointer;
+    padding: 2px;
+}
+body.layout-modern.loop-button-visible .loop-toggle-button:hover {
+    background-color: var(--color-4);
+}
+body.layout-modern.loop-button-visible .loop-toggle-button.active {
+    background-color: var(--color-5) !important;
+    color: var(--color-main);
+}
+body.layout-modern.band-range-visible #band-range-container {
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--color-text);
+    opacity: 0.7;
+}
+body.layout-modern.band-range-visible .band-range-part {
+    cursor: pointer;
+}
+body.layout-modern.band-range-visible .band-range-part:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+/* B4: Mobile View for Modern Layout */
+@media (max-width: 768px) {
+    body.layout-modern.modern-buttons-visible .band-selector-layout-wrapper {
+        display: block !important;
+    }
+    body.layout-modern.modern-buttons-visible .side-band-button-container,
+    body.layout-modern.modern-buttons-visible .am-bands-view-container {
+        display: none !important;
+    }
+    body.layout-modern #band-range-container,
+    body.layout-modern .loop-toggle-button {
+        display: none !important;
+    }
+    body.layout-modern.modern-buttons-visible #data-ant-container {
+        display: flex;
+        gap: 5px;
+        padding: 0 18px 10px 18px;
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: center;
+        align-items: baseline;
+    }
+    body.layout-modern.modern-buttons-visible #data-ant-container::before,
+    body.layout-modern.modern-buttons-visible #data-ant-container::after {
+        content: '';
+        flex: 1;
+    }
+    body.layout-modern.modern-buttons-visible #data-ant-container > .dropdown,
+    body.layout-modern.modern-buttons-visible #mobile-band-selector-wrapper,
+    body.layout-modern.modern-buttons-visible #mobile-sw-band-selector-wrapper {
+        width: 45% !important;
+        flex: 0 1 auto !important;
+        transition: width 0.3s ease;
+    }
+    body.layout-modern.modern-buttons-visible #data-ant-container.sw-mode-active > .dropdown,
+    body.layout-modern.modern-buttons-visible #data-ant-container.sw-mode-active > #mobile-band-selector-wrapper,
+    body.layout-modern.modern-buttons-visible #data-ant-container.sw-mode-active > #mobile-sw-band-selector-wrapper {
+        width: 30% !important;
+    }
+    body.layout-modern.modern-buttons-visible #mobile-sw-band-selector-wrapper {
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    body.layout-modern.modern-buttons-visible #data-ant-container:has(#mobile-band-selector-wrapper:only-child)::before,
+    body.layout-modern.modern-buttons-visible #data-ant-container:has(#mobile-band-selector-wrapper:only-child)::after {
+        display: none;
+    }
+    body.layout-modern.modern-buttons-visible #mobile-band-selector-wrapper:only-child {
+        width: 50% !important;
+        margin: 0 auto;
+    }
+    body.layout-modern.modern-buttons-visible #mobile-band-selector,
+    body.layout-modern.modern-buttons-visible #mobile-sw-band-selector {
+        width: 100%;
+        height: 48px;
+        background-color: var(--color-4);
+        color: var(--color-main);
+        border: none;
+        border-radius: 0 0 15px 15px;
+        font-weight: normal;
+        font-size: 14px;
+        padding: 0 10px;
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: url("data-image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 1em;
+    }
+}
+
+
+/* ========================================================================== */
+/* C: CLASSIC LAYOUT */
+/* ========================================================================== */
+
+/* C1: Basic structure for Classic Layout */
+body.layout-classic .band-selector-button {
+    background-color: rgba(0, 0, 0, 0.4);
+    color: var(--color-text);
+    border: 1px solid var(--color-2);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    line-height: 1.4;
+}
+body.layout-classic #freq-container {
+    position: relative !important;
+    overflow: hidden;
+}
+body.layout-classic .plugin-top-container {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+body.layout-classic .main-bands-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+body.layout-classic .main-band-button.active-band,
+body.layout-classic .sw-band-button.active-band,
+body.layout-classic #loop-toggle-button.active {
+    background-color: var(--color-4);
+    color: var(--color-main);
+    opacity: 1;
+}
+body.layout-classic .sw-bands-container {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    z-index: 9;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+body.layout-classic .sw-bands-grid {
+    display: grid;
+    gap: 2px;
+}
+body.layout-classic .sw-bands-top-wrapper {
+    grid-template-columns: repeat(3, 1fr);
+}
+body.layout-classic .sw-bands-bottom-wrapper {
+    grid-template-columns: repeat(2, 1fr);
+}
+body.layout-classic .sw-band-button {
+    padding: 1px 2px;
+    text-align: center;
+}
+body.layout-classic #band-range-container {
+    position: absolute;
+    bottom: 0px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--color-text);
+    opacity: 0.6;
+    white-space: nowrap;
+}
+body.layout-classic .band-range-part {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+body.layout-classic .band-range-part:hover {
+    opacity: 1;
+}
+body.layout-classic .range-separator {
+    opacity: 0.7;
+    pointer-events: none;
+}
+body.layout-classic #data-ant-container.classic-mobile-controls {
+    display: none;
+}
+
+/* C2: Mobile view for Classic Layout */
+@media (max-width: 768px) {
+    body.layout-classic .plugin-top-container,
+    body.layout-classic .sw-bands-container,
+    body.layout-classic #band-range-container {
+        display: none !important;
+    }
+    body.layout-classic #data-ant-container.classic-mobile-controls {
+        display: flex !important;
+        gap: 5px;
+        padding: 0 18px 10px 18px;
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: center;
+        align-items: baseline;
+    }
+    body.layout-classic #data-ant-container.classic-mobile-controls::before,
+    body.layout-classic #data-ant-container.classic-mobile-controls::after {
+        content: '';
+        flex: 1;
+    }
+    body.layout-classic #data-ant-container.classic-mobile-controls > .dropdown,
+    body.layout-classic #data-ant-container.classic-mobile-controls #mobile-band-selector-wrapper,
+    body.layout-classic #data-ant-container.classic-mobile-controls #mobile-sw-band-selector-wrapper {
+        width: 45% !important;
+        flex: 0 1 auto !important;
+        transition: width 0.3s ease;
+    }
+    body.layout-classic #data-ant-container.classic-mobile-controls.sw-mode-active > .dropdown,
+    body.layout-classic #data-ant-container.classic-mobile-controls.sw-mode-active > #mobile-band-selector-wrapper,
+    body.layout-classic #data-ant-container.classic-mobile-controls.sw-mode-active > #mobile-sw-band-selector-wrapper {
+        width: 30% !important;
+    }
+    body.layout-classic #data-ant-container.classic-mobile-controls #mobile-sw-band-selector-wrapper {
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    body.layout-classic #data-ant-container.classic-mobile-controls:has(#mobile-band-selector-wrapper:only-child)::before,
+    body.layout-classic #data-ant-container.classic-mobile-controls:has(#mobile-band-selector-wrapper:only-child)::after {
+        display: none;
+    }
+    body.layout-classic #data-ant-container.classic-mobile-controls #mobile-band-selector-wrapper:only-child {
+        width: 50% !important;
+        margin: 0 auto;
+    }
+    body.layout-classic #mobile-band-selector,
+    body.layout-classic #mobile-sw-band-selector {
+        width: 100%;
+        height: 48px;
+        background-color: var(--color-4);
+        color: var(--color-main);
+        border: none;
+        border-radius: 0 0 15px 15px;
+        font-weight: normal;
+        font-size: 14px;
+        padding: 0 10px;
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: url("data-image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        background-size: 1em;
+    }
+}
+
+/* ========================================================================== */
+/* FIX FOR BAND RANGE (Start <-> End) OVERLAP PÅ MOBIL / SMÅ SKJERMER */
+/* ========================================================================== */
+
+#band-range-container {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.band-range-part {
+    white-space: nowrap !important;
+}
+
+@media (max-width: 600px) {
+    #band-range-container {
+        font-size: 10px !important;
+    }
+    
+    .band-range-unit {
+        display: none !important;
+    }
+}
+@media (max-width: 768px) {
+    #magic-eye-wrapper { display: none !important; }
+    .magic-eye-panel-override { display: block !important; }
+    .magic-eye-text-wrapper { display: contents !important; }
+}
+.magic-eye-hidden { display: none !important; }
+
+.bw-option-selected {
+    background-color: var(--color-4) !important;
+    color: #000 !important;
+    font-weight: bold;
+}
+
+/* ========================================================================== */
+/* D: ANALOG SCALE HIDE FIX (THE 1x1 PIXEL HACK) */
+/* ========================================================================== */
+body.et-analog-active #sdr-graph {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 1 !important; /* Ligger skjult rett bak skalaen */
+    opacity: 1 !important; 
+    pointer-events: none !important;
+}
+
+/* Skjuler ALT ANNET som krever ytelse, inkludert det originale runde signal-canvaset! */
+body.et-analog-active #signal-canvas,
+body.et-analog-active #Antenna,
+body.et-analog-active #containerRotator,
+body.et-analog-active #sdr-graph-button-container,
+body.et-analog-active .spectrum-graph-update-text,
+body.et-analog-active #mm-mpx-combo-flex,
+body.et-analog-active #mm-signal-analyzer-flex,
+body.et-analog-active #mm-scope-flex {
+    display: none !important;
+}

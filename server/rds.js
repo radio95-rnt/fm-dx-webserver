@@ -157,9 +157,12 @@ class RDSDecoder {
     this.rt0_errors = Array(64).fill("10");
     this.rt1 = Array(64).fill(' ');
     this.rt1_errors = Array(64).fill("10");
+    this.lps = Array(64).fill(' ');
+    this.lps_errors = Array(64).fill("10");
     this.data.ps = '';
-    this.data.rt1 = '';
     this.data.rt0 = '';
+    this.data.rt1 = '';
+    this.data.lps = '';
     this.data.pty = 0;
     this.data.tp = 0;
     this.data.ta = 0;
@@ -350,6 +353,38 @@ class RDSDecoder {
             this.data.rt_flag = 0;
             this.rt1_to_clear = true;
         }
+    } else if (group === 15 && version == 0) {
+        const idx = blockB & 7;
+
+        if(c_error < 2) {
+            const err = Math.ceil(c_error * (10/3));
+            const old_err = this.lps_errors[idx * 4];
+            if(err < old_err) {
+                this.lps[idx * 4] = decode_charset(blockC >> 8);
+                this.lps[idx * 4 + 1] = decode_charset(blockC & 0xFF);
+                this.lps_errors[idx * 4] = err;
+                this.lps_errors[idx * 4 + 1] = err;
+            }
+        }
+        if(d_error < 2) {
+            const err = Math.ceil(d_error * (10/3));
+            const old_err = this.lps_errors[idx * 4 + 2];
+            if(err < old_err) {
+                this.lps[idx * 4 + 2] = decode_charset(blockD >> 8);
+                this.lps[idx * 4 + 3] = decode_charset(blockD & 0xFF);
+                this.lps_errors[idx * 4 + 2] = err;
+                this.lps_errors[idx * 4 + 3] = err;
+            }
+        }
+
+        var i = this.lps.indexOf("\r")
+        while(i != -1) {
+            this.lps[i] = " ";
+            i = this.lps.indexOf("\r");
+        }
+
+        this.data.lps = this.lps.join('');
+        this.data.lps_errors = this.lps_errors.join(',');
     } else {
         // console.log(group, version)
     }

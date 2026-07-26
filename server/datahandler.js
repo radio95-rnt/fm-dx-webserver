@@ -27,6 +27,7 @@ var dataToSend = {
   rt0: '',
   rt1: '',
   rt_flag: '',
+  lps: '',
   ims: 0,
   eq: 0,
   agc: 0,
