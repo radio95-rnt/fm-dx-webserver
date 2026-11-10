@@ -1,7 +1,6 @@
 const { serverConfig, configExists } = require('./server_config');
 if(!configExists()) return;
 
-const fetch = require('node-fetch');
 const consoleCmd = require('./console');
 const storage = require('./storage');
 

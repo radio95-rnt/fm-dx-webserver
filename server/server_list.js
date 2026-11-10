@@ -1,5 +1,4 @@
 /* Libraries / Imports */
-const fetch = require('node-fetch');
 const { logDebug, logInfo, logWarn } = require('./console');
 const { serverConfig, configSave } = require('./server_config');
 var pjson = require('../package.json');
